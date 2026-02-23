@@ -1,97 +1,233 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🚀 Xwake
 
-# Getting Started
+> Production-ready React Native mobile application built with scalable architecture and clean code principles.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## 📌 Overview
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Xwake is a cross-platform mobile application built using React Native CLI.  
+The Xwake follows a modular, scalable structure suitable for production deployment and long-term maintenance.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Designed with:
+- Clean architecture principles
+- Optimized rendering performance
+- Centralized state management
+- Secure authentication handling
+- Scalable backend integration
 
-```sh
-# Using npm
+---
+
+## 🏗 Architecture
+
+The application follows a structured layered approach:
+
+- Presentation Layer (Screens & Components)
+- State Layer (Redux Toolkit)
+- Service Layer (API & Socket Services)
+- Utility Layer (Helpers & Reusable Logic)
+
+```
+src/
+ ├── assets/
+ ├── components/
+ ├── screens/
+ ├── navigation/
+ ├── redux/
+ │    ├── slices/
+ │    ├── store.js
+ ├── services/
+ │    ├── api.js
+ │    ├── socket.js
+ ├── utils/
+ └── hooks/
+```
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Mobile | React Native (CLI) |
+| State Management | Redux Toolkit |
+| Networking | Axios |
+| Authentication | JWT |
+| Realtime | Socket.io |
+| Backend | Node.js + Express |
+| Database | MongoDB |
+
+---
+
+## ✨ Core Features
+
+- Secure Authentication (JWT-based)
+- Persistent Login State
+- Feed with Optimized FlatList
+- Reels Auto-Play (Visibility Controlled)
+- Like / Comment System
+- Profile Management
+- Real-time Updates via WebSockets
+- Clean Error Handling & API Layer
+- Modular Codebase for Scalability
+
+---
+
+## 🔐 Security Considerations
+
+- Token-based authentication
+- Centralized API instance with interceptors
+- Error boundary handling
+- Secure environment variable management
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/yourusername/project-name.git
+cd project-name
+```
+
+---
+
+### 2️⃣ Install Dependencies
+
+```bash
+npm install
+```
+
+or
+
+```bash
+yarn install
+```
+
+---
+
+### 3️⃣ Environment Setup
+
+Create a `.env` file:
+
+```
+BASE_URL=https://your-production-api.com
+SOCKET_URL=https://your-socket-server.com
+```
+
+---
+
+### 4️⃣ Start Metro
+
+```bash
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 5️⃣ Run Application
 
-### Android
+#### Android
 
-```sh
-# Using npm
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+#### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
+cd ios
+pod install
+cd ..
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 📈 Performance Optimizations
 
-## Step 3: Modify your app
+- Memoized components (React.memo)
+- Optimized FlatList rendering
+- Viewability tracking for media auto-play
+- Controlled re-renders via selectors
+- Lazy media loading
+- Efficient Redux slice structure
 
-Now that you have successfully run the app, let's make changes!
+---
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## 🧪 Development Practices
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- Feature-based folder structure
+- Reusable UI components
+- Separation of concerns
+- Clean API abstraction
+- Consistent naming conventions
+- Production-ready error handling
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
+## 📦 Build Release
 
-You've successfully run and modified your React Native App. :partying_face:
+### Android Production Build
 
-### Now what?
+```bash
+cd android
+./gradlew assembleRelease
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Output location:
 
-# Troubleshooting
+```
+android/app/build/outputs/apk/release/
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
+## 🔄 CI/CD (Recommended)
 
-To learn more about React Native, take a look at the following resources:
+For production environments:
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- GitHub Actions for automated builds
+- Code linting before merge
+- Environment-based builds (Dev / Staging / Prod)
+- Automated APK generation
+
+---
+
+## 🧩 Scalability Roadmap
+
+- TypeScript migration (if not already)
+- Unit & Integration testing
+- E2E testing (Detox)
+- Code splitting
+- Performance monitoring integration
+- App Store & Play Store deployment pipelines
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository  
+2. Create a feature branch  
+3. Commit clean, descriptive messages  
+4. Open a Pull Request  
+
+---
+
+## 📄 License
+
+Licensed under the MIT License.
+
+---
+
+## 👨‍💻 Maintainer
+
+**Sagar Singh**  
+React Native & Full Stack Developer  
+
+---
+
+## ⭐ Support
+
+If you find this project useful, consider starring the repository.
