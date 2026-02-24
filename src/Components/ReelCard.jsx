@@ -5,11 +5,13 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const ReelCard = ({ video, isActive }) => {
+const ReelCard = ({ reel, isActive }) => {
+  console.log("reeel is coming" ,reel);
+  
   return (
     <View style={{ height: 675 }}>
       <Video
-        source={{ uri: video }}
+        source={{ uri: reel.post.url || "https://www.w3schools.com/html/movie.mp4" }}
         style={{ flex: 1 }}
         resizeMode="cover"
         repeat
@@ -22,11 +24,11 @@ const ReelCard = ({ video, isActive }) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=387',
+                uri: reel.owner.profilePic.url || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=387',
               }}
             />
             <View style={{ marginLeft: 8, flexDirection: 'row', gap: 15 }}>
-              <Text style={styles.username}>SagarDevops</Text>
+              <Text style={styles.username}>{reel.owner.username}</Text>
               <Pressable style={styles.followBtn}>
                 <Text style={{ fontWeight: '600', color: 'white' }}>
                   Follow
@@ -35,7 +37,7 @@ const ReelCard = ({ video, isActive }) => {
             </View>
           </View>
           <Text style={{ marginTop: 5, color: '#ffffff' }}>
-            This is caption check
+            {reel.caption}
           </Text>
         </View>
 
@@ -79,7 +81,12 @@ const ReelCard = ({ video, isActive }) => {
   );
 };
 
-export default ReelCard;
+export default React.memo(ReelCard, (prevProps, nextProps) => {
+  return (
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.reel._id === nextProps.reel._id
+  );
+});
 
 const styles = StyleSheet.create({
   topHeader: {
