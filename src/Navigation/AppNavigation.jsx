@@ -15,10 +15,20 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { fetchUser } from '../Redux/slices/authSlice';
 
 const AppNavigation = () => {
 
- 
+
+const user = useSelector(state => state.auth.user);
+const isAuth = useSelector(state => state.auth.isAuth);
+const loading = useSelector(state => state.auth.loading);
+
+const userprofile = user?.profilePic?.url
+console.log("USER PROFILE PIC:", userprofile);
+
 
   return (
     <Tab.Navigator
@@ -80,7 +90,7 @@ const AppNavigation = () => {
         options={{
           tabBarIcon: ({ focused }) => (
             <Image
-              source={{ uri:'https://i.pravatar.cc/150?img=3' }}
+              source={{ uri: userprofile || 'https://i.pravatar.cc/150?img=3' }}
               style={{
                 width: focused ? 28 : 24,
                 height: focused ? 28 : 24,

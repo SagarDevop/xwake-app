@@ -5,6 +5,8 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
 import React, { useEffect } from 'react';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -24,6 +26,9 @@ import { useRef } from 'react';
 import { useMemo } from 'react';
 import { useCallback } from 'react';
 import { FlashList } from '@shopify/flash-list';
+import HomeLoadPage from '../Loader/HomeLoadPage';
+import { fetchFeed } from '../Redux/slices/feedSlice';
+import PostSkeleton from '../Loader/PostSkeleton';
 
 const story = [
   {
@@ -44,13 +49,11 @@ const Home = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [showToast, setShowToast] = useState(false);
+  const [visibleId, setVisibleId] = useState(null);
 
-  //state for post
-  const [posts, setPosts] = useState([]);
-  const [reels, setReels] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const { posts, page, hasMore, initialLoading, paginationLoading } =
+    useSelector(state => state.feed);
+
   const viewabilityRef = useRef();
 
   const handleLogout = async () => {
@@ -68,76 +71,59 @@ const Home = () => {
     }
   };
 
-  const fetchFeed = async (pageNumber = 1) => {
-    if (loading || !hasMore) return;
-
-    try {
-      setLoading(true);
-
-      const res = await api.get(`/api/post/all?page=${pageNumber}&limit=20`);
-      console.log(res.data);
-      const newPosts = res.data.posts;
-      const newReels = res.data.reels;
-
-      setPosts(prev => (pageNumber === 1 ? newPosts : [...prev, ...newPosts]));
-      setReels(prev => (pageNumber === 1 ? newReels : [...prev, ...newReels]));
-
-      setHasMore(
-        res.data.pagination.hasMorePosts || res.data.pagination.hasMoreReels,
-      );
-      setPage(pageNumber);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFeed(1);
-  }, []);
-
-  // i am combinig post and reel accoording TO as they are created
-
-  const combinedFeed = useMemo(() => {
-  return [...posts, ...reels].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-}, [posts, reels]);
-
-
   // render on time
 
-  const renderItem = useCallback(({ item }) => {
-    if (item.type === 'post') {
-      return <PostCard post={item} />;
-    } else {
-      return <ReelHCard reel={item} />;
-    }
-  }, []);
+  const renderItem = useCallback(
+    ({ item }) => {
+      if (item.type === 'post') {
+        return <PostCard post={item} />;
+      } else {
+        return <ReelHCard reel={item} isVisible={visibleId === item._id} />;
+      }
+    },
+    [visibleId],
+  );
 
   //
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 80,
   };
 
-  const handleViewableItemsChanged = useRef(({ viewableItems, changed }) => {
-    changed.forEach(item => {
-      item.item.__setVisibility?.(item.isViewable);
-    });
+  const handleViewableItemsChanged = useRef(({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setVisibleId(viewableItems[0].item._id);
+    }
   });
+
+  if (initialLoading) {
+    return <HomeLoadPage />;
+  }
 
   return (
     <View style={{ flex: 1 }}>
       <FlashList
-        data={combinedFeed}
+        data={posts}
         keyExtractor={item => item._id}
         renderItem={renderItem}
         estimatedItemSize={650}
-        onEndReached={() => fetchFeed(page + 1)}
+        onEndReached={() => {
+          console.log('END REACHED', page);
+          if (hasMore && !paginationLoading) {
+            dispatch(fetchFeed(page + 1));
+          }
+        }}
+        ListFooterComponent={() =>
+          paginationLoading ? (
+            <>
+              <PostSkeleton />
+              <PostSkeleton />
+            </>
+          ) : null
+        }
         onEndReachedThreshold={0.5}
         onViewableItemsChanged={handleViewableItemsChanged.current}
         viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
+        removeClippedSubviews={true}
         ListHeaderComponent={
           <View>
             <View
@@ -189,9 +175,12 @@ const Home = () => {
                         width: 90,
                         borderRadius: 100,
                         backgroundColor: 'white',
+                        alignContent: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      {/*borderWidth:2, borderColor:'green' when story upload */}
+                      
+                    
                     </View>
                     <View
                       style={{

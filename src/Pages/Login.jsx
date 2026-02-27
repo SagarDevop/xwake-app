@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import api from '../api';
 import { useDispatch } from 'react-redux';
-import { setToken, setUser } from '../Redux/slices/authSlice';
+import { setToken, fetchUser } from '../Redux/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomToast from '../Components/CustomToast';
 const Login = () => {
@@ -67,7 +67,7 @@ const Login = () => {
       const testToken = await AsyncStorage.getItem('accessToken');
       console.log('JUST SAVED TOKEN:', testToken);
       dispatch(setToken(res.data.accessToken));
-      dispatch(setUser(res.data.user));
+      await dispatch(fetchUser());
 
       setError('');
     } catch (error) {

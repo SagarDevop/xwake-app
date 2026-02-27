@@ -87,7 +87,7 @@ style={{backgroundColor:'#e7e7e7', marginBottom:14, paddingHorizontal:14, paddin
       </View>
       </View>
       <View style={{flexDirection:'row', gap:'15', paddingLeft:9,marginBottom:20}} >
-      <Text style={{fontSize:16, fontWeight:'600'}}>{post.owner.name}</Text>
+      <Text style={{fontSize:16, fontWeight:'600'}}>{post.owner.username}</Text>
       <Text style={{marginTop:3, color:'#767777'}}>{post.caption}</Text>
       </View>
     </View>

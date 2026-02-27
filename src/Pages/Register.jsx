@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Platform } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { setToken, setUser } from '../Redux/slices/authSlice';
+import { setToken, fetchUser } from '../Redux/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Register = () => {
@@ -226,7 +226,7 @@ const Register = () => {
       const testToken = await AsyncStorage.getItem('accessToken');
       console.log('JUST SAVED TOKEN:', testToken);
       dispatch(setToken(res.data.accessToken));
-      dispatch(setUser(res.data.user));
+      await dispatch(fetchUser());
     } catch (error) {
       console.log('FULL ERROR:', error);
       console.log('STATUS:', error.response?.status);

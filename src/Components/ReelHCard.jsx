@@ -5,21 +5,14 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Video from 'react-native-video';
 import { useEffect, useRef, useState } from 'react';
+import { Dimensions } from 'react-native';
+
+
 
 const ReelHCard = ({ reel, isVisible }) => {
   const videoRef = useRef(null);
-  const [paused, setPaused] = useState(true);
-  
-
-  useEffect(() => {
-    reel.__setVisibility = (visible) => {
-      setPaused(!visible);
-    };
-
-    return () => {
-      reel.__setVisibility = null;
-    };
-  }, [reel]);
+ 
+  const { height } = Dimensions.get('window');
 
   const timeAgo = iso => {
     const seconds = Math.floor((new Date() - new Date(iso)) / 1000);
@@ -41,10 +34,10 @@ const ReelHCard = ({ reel, isVisible }) => {
       <Video
         ref={videoRef}
         source={{ uri: reel.post.url }}
-        style={{ height: 600 }}
+        style={{ height: height * 0.75 }}
         resizeMode="cover"
         repeat
-        paused={paused}
+        paused={!isVisible}
         playInBackground={false}
         playWhenInactive={false}
         ignoreSilentSwitch="ignore"
@@ -84,12 +77,12 @@ const ReelHCard = ({ reel, isVisible }) => {
           paddingVertical: 5,
         }}
       >
-        <View style={{ flexDirection: 'row', gap: '15' }}>
-          <View style={{ flexDirection: 'row', gap: '5' }}>
+        <View style={{ flexDirection: 'row', gap: 15 }}>
+          <View style={{ flexDirection: 'row', gap: 5 }}>
             <Feather name="thumbs-up" color="#000" size={24} />
             <Text style={{ paddingTop: 6 }}>Vibe Up</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: '5' }}>
+          <View style={{ flexDirection: 'row', gap: 5 }}>
             <Feather
               style={{ paddingTop: 8 }}
               name="thumbs-down"
@@ -99,7 +92,7 @@ const ReelHCard = ({ reel, isVisible }) => {
             <Text style={{ paddingTop: 6 }}>Vibe Down</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', gap: '15', marginTop: 6 }}>
+        <View style={{ flexDirection: 'row', gap: 15, marginTop: 6 }}>
           <MaterialIcons name="comment" color="#000" size={24} />
           <Feather name="send" color="#000" size={24} />
         </View>
@@ -113,7 +106,7 @@ const ReelHCard = ({ reel, isVisible }) => {
         }}
       >
         <Text style={{ fontSize: 16, fontWeight: '600' }}>
-          {reel.owner.name}
+          @{reel.owner.username}
         </Text>
         <Text style={{ marginTop: 3, color: '#767777' }}>{reel.caption}</Text>
       </View>

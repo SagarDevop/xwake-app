@@ -35,7 +35,6 @@ const Reels = () => {
   const fetchreels = async () => {
    try {
      const res = await api.get('/api/post/all?page=1&limit=20')
-     console.log(res.data.reels);
      setReels(res.data.reels);
    } catch (error) {
       console.log(error);

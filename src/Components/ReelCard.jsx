@@ -6,7 +6,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const ReelCard = ({ reel, isActive }) => {
-  console.log("reeel is coming" ,reel);
+
   
   return (
     <View style={{ height: 675 }}>
