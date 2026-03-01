@@ -84,10 +84,7 @@ const currentUserId = useSelector(state => state.auth.user._id);
   const renderItem = useCallback(
     ({ item }) => {
       if (item.type === 'post') {
-        return <PostCard post={item}  onCommentPress={() => {
-              console.log('presses');
-              
-            }}/>;
+        return <PostCard post={item}  />;
       } else {
         return <ReelHCard reel={item} isVisible={visibleId === item._id} />;
       }

@@ -13,7 +13,7 @@ import { store } from './src/Redux/store'
 import AuthNavigtion from './src/Navigation/AuthNavigtion'
 import Toast from 'react-native-toast-message';
 import SocketProvider from './src/Redux/Provider/SocketProvider'
-
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const App = () => {
   return (
@@ -21,10 +21,12 @@ const App = () => {
     <Provider store={store}>
 
    <SocketProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
    <NavigationContainer>
       <AuthNavigtion />
      <Toast /> 
    </NavigationContainer>
+   </GestureHandlerRootView>
 </SocketProvider>
    </Provider>
  

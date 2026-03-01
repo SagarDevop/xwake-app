@@ -8,8 +8,10 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { sendFeedback } from '../Redux/slices/feedSlice';
 import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
-const PostCard = ({ post, onCommentPress }) => {
+const PostCard = ({ post}) => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const currentUserId = user?._id;
@@ -139,7 +141,7 @@ const PostCard = ({ post, onCommentPress }) => {
             style={{ flexDirection: 'row', gap: 5 }}
           >
             <FontAwesome
-              name={isVibedUp ? "thumbs-up" : "thumbs-o-up"}
+              name={isVibedUp ? 'thumbs-up' : 'thumbs-o-up'}
               size={24}
               color={isVibedUp ? '#3b82f6' : '#000'}
             />
@@ -160,9 +162,9 @@ const PostCard = ({ post, onCommentPress }) => {
             style={{ flexDirection: 'row', gap: 5 }}
           >
             <FontAwesome
-               name={isVibedDown ? "thumbs-down" : "thumbs-o-down"}
+              name={isVibedDown ? 'thumbs-down' : 'thumbs-o-down'}
               size={24}
-              style={{paddingTop:5}}
+              style={{ paddingTop: 5 }}
               color={isVibedDown ? '#ef4444' : '#000'}
             />
             <Text
@@ -178,7 +180,11 @@ const PostCard = ({ post, onCommentPress }) => {
           </Pressable>
         </View>
         <View style={{ flexDirection: 'row', gap: 15, marginTop: 6 }}>
-          <Pressable onPress={() => onCommentPress(post._id)}>
+          <Pressable
+            onPress={() =>
+              navigation.navigate('Comments', { postId: post._id })
+            }
+          >
             {' '}
             <MaterialIcons name="comment" color="#000" size={24} />
           </Pressable>

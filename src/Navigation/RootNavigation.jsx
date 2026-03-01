@@ -1,33 +1,42 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import AppNavigation from './AppNavigation';
-import Notification from '../Screens/Notification'
-const Stack = createStackNavigator();
+import Notification from '../Screens/Notification';
+import CommentsScreen from '../Components/CommentsScreen';
+
+const Stack = createNativeStackNavigator();
 
 const RootNavigation = () => {
   return (
- 
-      <Stack.Navigator
+    <Stack.Navigator>
+      <Stack.Screen
+        name="AppNavigation"
+        component={AppNavigation}
+        options={{ headerShown: false }}
+      />
 
-      >
-        <Stack.Screen
+      <Stack.Screen
+        name="Notification"
+        component={Notification}
         options={{
-        headerShown: false
-      }}
-        name="AppNavigation" component={AppNavigation} />
-        <Stack.Screen
-         options={{
-    title: "Notification",
-    headerStyle: {
-      backgroundColor: "transparent",
-      elevation: 0,      
-    }
-  }}
-        name="Notification" component={Notification} />
-      
-        
-      </Stack.Navigator>
-    
+          title: 'Notification',
+          headerTransparent: true,
+        }}
+      />
+
+      {/* 🔥 Instagram Style Comments */}
+      <Stack.Screen
+        name="Comments"
+        component={CommentsScreen}
+        options={{
+          presentation: 'transparentModal',
+          animation: 'slide_from_bottom',
+          gestureEnabled: true,
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 };
 
