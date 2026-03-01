@@ -29,6 +29,9 @@ import { FlashList } from '@shopify/flash-list';
 import HomeLoadPage from '../Loader/HomeLoadPage';
 import { fetchFeed } from '../Redux/slices/feedSlice';
 import PostSkeleton from '../Loader/PostSkeleton';
+import { updatePostFromSocket } from "../Redux/slices/feedSlice";
+import { useSocket } from "../Redux/Provider/SocketProvider";
+
 
 const story = [
   {
@@ -50,9 +53,14 @@ const Home = () => {
   const dispatch = useDispatch();
   const [showToast, setShowToast] = useState(false);
   const [visibleId, setVisibleId] = useState(null);
+  const socket = useSocket();
+
 
   const { posts, page, hasMore, initialLoading, paginationLoading } =
     useSelector(state => state.feed);
+  const userAvatar = useSelector(state => state.auth.user.profilePic.url);
+  
+const currentUserId = useSelector(state => state.auth.user._id);
 
   const viewabilityRef = useRef();
 
@@ -76,7 +84,10 @@ const Home = () => {
   const renderItem = useCallback(
     ({ item }) => {
       if (item.type === 'post') {
-        return <PostCard post={item} />;
+        return <PostCard post={item}  onCommentPress={() => {
+              console.log('presses');
+              
+            }}/>;
       } else {
         return <ReelHCard reel={item} isVisible={visibleId === item._id} />;
       }
@@ -95,6 +106,36 @@ const Home = () => {
     }
   });
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleVibeUp = (data) => {
+      dispatch(
+        updatePostFromSocket({
+          postId: data.postId,
+          vibesUp: data.vibesUp,
+        })
+      );
+    };
+
+    const handleVibeDown = (data) => {
+      dispatch(
+        updatePostFromSocket({
+          postId: data.postId,
+          vibesDown: data.vibesDown,
+        })
+      );
+    };
+
+    socket.on("postVibeUpdated", handleVibeUp);
+    socket.on("postVibeDownUpdated", handleVibeDown);
+
+    return () => {
+      socket.off("postVibeUpdated", handleVibeUp);
+      socket.off("postVibeDownUpdated", handleVibeDown);
+    };
+  }, [socket, dispatch]);
+
   if (initialLoading) {
     return <HomeLoadPage />;
   }
@@ -105,11 +146,12 @@ const Home = () => {
         data={posts}
         keyExtractor={item => item._id}
         renderItem={renderItem}
+       
         estimatedItemSize={650}
         onEndReached={() => {
           console.log('END REACHED', page);
           if (hasMore && !paginationLoading) {
-            dispatch(fetchFeed(page + 1));
+            dispatch(fetchFeed({ page: page + 1, currentUserId }));
           }
         }}
         ListFooterComponent={() =>
@@ -179,7 +221,17 @@ const Home = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      
+                      <Image
+                      style={{
+                        height:85,
+                        width:85,
+                        borderRadius:100,
+                        marginLeft: 2.5,
+                      }}
+                      source={{
+                        uri:userAvatar
+                      }}
+                      />
                     
                     </View>
                     <View
@@ -210,6 +262,7 @@ const Home = () => {
                       borderRadius: 100,
                       backgroundColor: 'white',
                       marginRight: 15,
+                      
                     }}
                   >
                     {/*borderWidth:2, borderColor:'green' when story upload */}
@@ -248,6 +301,7 @@ const Home = () => {
           />
         </Pressable>
       </View>
+      
     </View>
   );
 };

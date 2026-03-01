@@ -9,19 +9,17 @@ import { fetchFeed } from '../Redux/slices/feedSlice';
 import { View, Text } from 'react-native';
 import HomeLoadPage from '../Loader/HomeLoadPage';
 
-
 const AuthNavigtion = () => {
   const dispatch = useDispatch();
+  
 
-  const { isAuth, loading: authLoading } = useSelector(
-    state => state.auth
-  );
+  const { isAuth, loading: authLoading } = useSelector(state => state.auth);
 
- const { initialLoading } = useSelector(state => state.feed);
+  const { initialLoading } = useSelector(state => state.feed);
 
+  console.log('AUTH LOADING:', authLoading);
+  console.log('FEED LOADING:', initialLoading);
  
-  console.log("AUTH LOADING:", authLoading);
-  console.log("FEED LOADING:", initialLoading);
 
   useEffect(() => {
     const loadToken = async () => {
@@ -33,7 +31,8 @@ const AuthNavigtion = () => {
         const userResult = await dispatch(fetchUser());
 
         if (userResult.meta.requestStatus === 'fulfilled') {
-          await dispatch(fetchFeed(1));
+          const currentUserId = userResult.payload._id; // 
+          await dispatch(fetchFeed({ page: 1, currentUserId }));
         }
       } else {
         dispatch(logout());
@@ -44,12 +43,10 @@ const AuthNavigtion = () => {
   }, []);
 
   if (authLoading || initialLoading) {
-    return (
-      <HomeLoadPage/>
-    );
+    return <HomeLoadPage />;
   }
 
-  return isAuth ?    <RootNavigation/> : <OutterNavigation />;
+  return isAuth ? <RootNavigation /> : <OutterNavigation />;
 };
 
 export default AuthNavigtion;

@@ -2,16 +2,39 @@ import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import React from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Video from 'react-native-video';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions } from 'react-native';
-
-
+import { useDispatch } from 'react-redux';
+import { sendFeedback } from '../Redux/slices/feedSlice';
 
 const ReelHCard = ({ reel, isVisible }) => {
+  // vibe up / down things
+  const dispatch = useDispatch();
+  const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = reel;
+
+  const handleVibeUp = postId => {
+    dispatch(
+      sendFeedback({
+        postId,
+        feedbackType: 'vibeUp',
+      }),
+    );
+  };
+
+  const handleVibeDown = postId => {
+    dispatch(
+      sendFeedback({
+        postId,
+        feedbackType: 'vibeDown',
+      }),
+    );
+  };
+
   const videoRef = useRef(null);
- 
+
   const { height } = Dimensions.get('window');
 
   const timeAgo = iso => {
@@ -78,19 +101,47 @@ const ReelHCard = ({ reel, isVisible }) => {
         }}
       >
         <View style={{ flexDirection: 'row', gap: 15 }}>
-          <View style={{ flexDirection: 'row', gap: 5 }}>
-            <Feather name="thumbs-up" color="#000" size={24} />
-            <Text style={{ paddingTop: 6 }}>Vibe Up</Text>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 5 }}>
-            <Feather
+          <Pressable
+            onPress={() => handleVibeUp(reel._id)}
+            style={{ flexDirection: 'row', gap: 5 }}
+          >
+            <FontAwesome
+              name={isVibedUp ? "thumbs-up" : "thumbs-o-up"}
+              size={24}
+              color={isVibedUp ? '#3b82f6' : '#000'}
+            />
+            <Text
+              style={{ paddingTop: 6, color: isVibedUp ? '#3b82f6' : '#000' }}
+            >
+              Vibe Up
+            </Text>
+            <Text
+              style={{ paddingTop: 6, color: isVibedUp ? '#3b82f6' : '#000' }}
+            >
+              {vibesUpCount || 0}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => handleVibeDown(reel._id)}
+            style={{ flexDirection: 'row', gap: 5 }}
+          >
+            <FontAwesome
+               name={isVibedDown ? "thumbs-down" : "thumbs-o-down"}
               style={{ paddingTop: 8 }}
-              name="thumbs-down"
-              color="#000"
+              color={isVibedDown ? '#ef4444' : '#000'}
               size={24}
             />
-            <Text style={{ paddingTop: 6 }}>Vibe Down</Text>
-          </View>
+            <Text
+              style={{ paddingTop: 6, color: isVibedDown ? '#ef4444' : '#000' }}
+            >
+              Vibe Down
+            </Text>
+            <Text
+              style={{ paddingTop: 6, color: isVibedDown ? '#ef4444' : '#000' }}
+            >
+              {vibesDownCount || 0}
+            </Text>
+          </Pressable>
         </View>
         <View style={{ flexDirection: 'row', gap: 15, marginTop: 6 }}>
           <MaterialIcons name="comment" color="#000" size={24} />
