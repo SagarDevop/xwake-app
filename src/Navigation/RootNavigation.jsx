@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AppNavigation from './AppNavigation';
 import Notification from '../Screens/Notification';
 import CommentsScreen from '../Components/CommentsScreen';
+import ShareScreen from '../Components/ShareScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,16 @@ const RootNavigation = () => {
       <Stack.Screen
         name="Comments"
         component={CommentsScreen}
+        options={{
+          presentation: 'transparentModal',
+          animation: 'slide_from_bottom',
+          gestureEnabled: true,
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ShareScreen"
+        component={ShareScreen}
         options={{
           presentation: 'transparentModal',
           animation: 'slide_from_bottom',

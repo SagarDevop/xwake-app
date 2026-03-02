@@ -135,18 +135,19 @@ const PostCard = ({ post}) => {
           paddingVertical: 5,
         }}
       >
-        <View style={{ flexDirection: 'row', gap: 15 }}>
+        <View style={{ flexDirection: 'row', gap: 22, justifyContent:'center' }}>
           <Pressable
             onPress={() => handleVibeUp(post._id)}
-            style={{ flexDirection: 'row', gap: 5 }}
+            style={{ flexDirection: 'row', gap: 5,  }}
           >
             <FontAwesome
               name={isVibedUp ? 'thumbs-up' : 'thumbs-o-up'}
-              size={24}
+              size={21}
               color={isVibedUp ? '#3b82f6' : '#000'}
+              style={{paddingTop:3}}
             />
             <Text
-              style={{ paddingTop: 6, color: isVibedUp ? '#3b82f6' : '#000' }}
+              style={{ paddingTop: 6, fontSize: 13, color: isVibedUp ? '#3b82f6' : '#000' }}
             >
               Vibe Up
             </Text>
@@ -163,12 +164,12 @@ const PostCard = ({ post}) => {
           >
             <FontAwesome
               name={isVibedDown ? 'thumbs-down' : 'thumbs-o-down'}
-              size={24}
-              style={{ paddingTop: 5 }}
+              size={21}
+              style={{ paddingTop: 6 }}
               color={isVibedDown ? '#ef4444' : '#000'}
             />
             <Text
-              style={{ paddingTop: 6, color: isVibedDown ? '#ef4444' : '#000' }}
+              style={{ paddingTop: 6, fontSize: 13, color: isVibedDown ? '#ef4444' : '#000' }}
             >
               Vibe Down
             </Text>
@@ -178,17 +179,25 @@ const PostCard = ({ post}) => {
               {vibesDownCount || 0}
             </Text>
           </Pressable>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 15, marginTop: 6 }}>
           <Pressable
             onPress={() =>
               navigation.navigate('Comments', { postId: post._id })
             }
+            style={{ flexDirection: 'row', gap: 5 , marginTop: 5}}
           >
-            {' '}
-            <MaterialIcons name="comment" color="#000" size={24} />
+            <MaterialIcons name="comment" color="#000" size={21} />
+            <Text style={{ fontSize: 13,}}>{post.commentsCount || 0}</Text>
           </Pressable>
-          <Feather name="send" color="#000" size={24} />
+          <Pressable
+          onPress={() =>
+            navigation.navigate('ShareScreen', {postValue: post})
+          }
+          style={{ flexDirection: 'row', marginTop: 5 }}>
+            <Feather name="send" color="#000" size={21} />
+          </Pressable>
+          <Pressable style={{ flexDirection: 'row',marginTop: 5 }}>
+            <Feather name="bookmark" color="#000" size={21} />
+          </Pressable>
         </View>
       </View>
       <View

@@ -9,6 +9,8 @@ import {
   Platform,
   Dimensions,
   Image,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -22,28 +24,62 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
-
 const { height } = Dimensions.get('window');
 
-const CommentsScreen = () => {
-  const navigation = useNavigation();
+const ShareScreen = () => {
   const route = useRoute();
-  const { postId } = route.params;
+  const { postValue } = route.params;
+  console.log('Received postValue in ShareScreen:', postValue);
+  const navigation = useNavigation();
   const userProfilePic = useSelector(state => state.auth.user?.profilePic?.url);
   const [inputText, setInputText] = useState('');
 
-  const quickEmojis = ['❤️', '🙌', '🔥', '👏', '😍'];
-
   const [comments] = useState([
-    { id: '1', user: 'John', text: 'Nice post!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/1.jpg'},
-    { id: '2', user: 'John', text: 'Nice post1!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/2.jpg'},
-    { id: '3', user: 'John', text: 'Nice post2!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/3.jpg'},
-    { id: '4', user: 'John', text: 'Nice post3!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/4.jpg'},
-    { id: '5', user: 'John', text: 'Nice post!4', type: 'comment', url: 'https://randomuser.me/api/portraits/men/5.jpg'},
-    { id: '6', user: 'John', text: 'Nice post!5', type: 'comment', url: 'https://randomuser.me/api/portraits/men/6.jpg'},
-    { id: '7', user: 'John', text: 'Nice post!6', type: 'comment', url: 'https://randomuser.me/api/portraits/men/7.jpg'},
-    { id: '8', user: 'John', text: 'Nice post!7', type: 'comment', url: 'https://randomuser.me/api/portraits/men/8.jpg'},
-    { id: '9', user: 'Alex', text: 'Agree ', type: 'reply', url: 'https://randomuser.me/api/portraits/men/9.jpg'},
+    {
+      id: '1',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/1.jpg',
+    },
+    {
+      id: '2',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/2.jpg',
+    },
+    {
+      id: '3',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/3.jpg',
+    },
+    {
+      id: '4',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/4.jpg',
+    },
+    {
+      id: '5',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/5.jpg',
+    },
+    {
+      id: '6',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/6.jpg',
+    },
+    {
+      id: '7',
+      user: 'Johnd',
+      url: 'https://randomuser.me/api/portraits/men/7.jpg',
+    },
+    {
+      id: '8',
+      user: 'John',
+      url: 'https://randomuser.me/api/portraits/men/8.jpg',
+    },
+    {
+      id: '9',
+      user: 'Alex',
+      url: 'https://randomuser.me/api/portraits/men/9.jpg',
+    },
   ]);
 
   const translateY = useSharedValue(0);
@@ -74,25 +110,12 @@ const CommentsScreen = () => {
 
   const renderItem = useCallback(({ item }) => {
     return (
-      <View
-        style={[
-          styles.commentContainer,
-          item.type === 'reply' && styles.replyContainer,
-        ]}
-      >
-        <View style={styles.commentContent}>
-          <Image source={{ uri: item.url }} style={{height: 38, width:38, borderRadius:100}} />
-          <View style={styles.commentTextContainer}>
-            <View style={{flexDirection:'row', gap:10}}>
-              <Text style={styles.username}>{item.user}</Text>
-              <Text style={{color:"#b4b4b4", fontSize:12}}>1h</Text>
-              </View>
-            <Text style={{fontSize:14, marginTop: -4}}>{item.text}</Text>
-            <Pressable>
-              <Text style={{fontSize:13, color:"#949494"}}>Reply</Text>
-            </Pressable>
-          </View>
-        </View>
+      <View style={styles.commentContent}>
+        <Image
+          source={{ uri: item.url }}
+          style={{ height: 70, width: 70, borderRadius: 100 }}
+        />
+        <Text style={styles.username}>{item.user}</Text>
       </View>
     );
   }, []);
@@ -100,11 +123,13 @@ const CommentsScreen = () => {
   return (
     <View style={styles.overlay}>
       <Animated.View style={[styles.sheet, animatedStyle]}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={0}
         >
+          
           <GestureDetector gesture={gesture}>
             <View style={{ backgroundColor: 'transparent' }}>
               <View style={styles.dragHandle} />
@@ -113,8 +138,50 @@ const CommentsScreen = () => {
                 <Pressable onPress={() => navigation.goBack()}>
                   <AntDesign name="down" color="#000" size={24} />
                 </Pressable>
-                <Text style={styles.headerTitle}>Comments</Text>
+                <Text style={styles.headerTitle}>Share</Text>
                 <View style={{ width: 22 }} />
+              </View>
+
+                              <View
+                style={{
+                  margin: 10,
+
+                  height: 60,
+
+                  borderRadius: 10,
+                  flexDirection: 'row',
+                  gap: 10,
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                }}
+              >
+                <Image
+                  source={{ uri: postValue?.post?.url }}
+                  style={{ height: 57, width: 55, borderRadius: 10 }}
+                />
+                <View>
+                  <Text style={{ fontSize: 16, fontWeight: '400' }}>
+                    {postValue.owner.name}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '400',
+                      color: '#777b7c',
+                    }}
+                  >
+                    @{postValue.owner.username}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Search user..."
+                  style={styles.input}
+                  value={inputText}
+                  onChangeText={setInputText}
+                />
               </View>
             </View>
           </GestureDetector>
@@ -123,50 +190,21 @@ const CommentsScreen = () => {
             data={comments}
             renderItem={renderItem}
             estimatedItemSize={70}
+            numColumns={3}
             keyExtractor={item => item.id}
             contentContainerStyle={{ paddingBottom: 10 }}
             style={{ flex: 1 }}
+            showsHorizontalScrollIndicator={false}
           />
-          <View style={styles.emojiRow}>
-            {quickEmojis.map((emoji, index) => (
-              <Pressable
-                key={index}
-                onPress={() => setInputText(prev => prev + emoji)}
-              >
-                <Text style={styles.emojiText}>{emoji}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <View style={styles.inputContainer}>
-            <Image
-             source={{
-              uri:userProfilePic
-             }}
-             style ={styles.profilePic}
-            />
-            <TextInput
-              placeholder="Add a comment..."
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText} 
-            />
-            <Pressable
-              onPress={() => {
-                
-                console.log('Posting:', inputText);
-                setInputText(''); 
-              }}
-            >
-              <FontAwesome style={styles.sendIcon} name="send" color="#000" size={21} />
-            </Pressable>
-          </View>
+         
         </KeyboardAvoidingView>
+         </TouchableWithoutFeedback>
       </Animated.View>
     </View>
   );
 };
 
-export default CommentsScreen;
+export default ShareScreen;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -174,8 +212,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    flex: 1,
-
+    height: height * 0.6,
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -203,11 +240,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   commentContainer: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    padding: 15,
   },
-  commentContent:{
- flexDirection:'row',
+  commentContent: {
+    margin: 10,
+    width: 66,
+    alignItems: 'center',
   },
   replyContainer: {
     marginLeft: 40,
@@ -215,47 +253,43 @@ const styles = StyleSheet.create({
   username: {
     fontWeight: 'bold',
     marginBottom: 3,
-    fontSize: 12.5,
   },
-  commentTextContainer:{
+  commentTextContainer: {
     marginLeft: 10,
     justifyContent: 'center',
-    
-
-
   },
   emojiRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around', 
+    justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 3,
     paddingHorizontal: 15,
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
     borderTopWidth: 0.5,
     borderColor: '#ddd',
   },
   emojiText: {
-    fontSize: 23, 
+    fontSize: 23,
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 10,
     backgroundColor: '#fff',
   },
-  profilePic:{
-    width: 35,
+  profilePic: {
+    width: 5,
     height: 35,
     borderRadius: 100,
     marginRight: 10,
   },
   input: {
     flex: 1,
-    backgroundColor:"#f0f0f0",
-    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
     paddingHorizontal: 15,
+    paddingVertical: 14,
   },
   sendIcon: {
     margin: 8,
-
   },
 });
