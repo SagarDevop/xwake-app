@@ -108,7 +108,7 @@ const PostCard = ({ post}) => {
               {isFollowing ? 'Following' : 'Follow'}
             </Text>
           </Pressable>
-          <Pressable>
+          <Pressable onPress={() => navigation.navigate('ThreeDotScreen', { postValue: post })}>
             <Entypo
               style={{ marginTop: 4 }}
               name="dots-three-vertical"

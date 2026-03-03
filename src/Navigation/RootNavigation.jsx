@@ -5,6 +5,7 @@ import AppNavigation from './AppNavigation';
 import Notification from '../Screens/Notification';
 import CommentsScreen from '../Components/CommentsScreen';
 import ShareScreen from '../Components/ShareScreen';
+import ThreeDotScreen from '../Components/ThreeDotScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,7 +27,7 @@ const RootNavigation = () => {
         }}
       />
 
-      {/* 🔥 Instagram Style Comments */}
+    
       <Stack.Screen
         name="Comments"
         component={CommentsScreen}
@@ -40,6 +41,16 @@ const RootNavigation = () => {
       <Stack.Screen
         name="ShareScreen"
         component={ShareScreen}
+        options={{
+          presentation: 'transparentModal',
+          animation: 'slide_from_bottom',
+          gestureEnabled: true,
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ThreeDotScreen"
+        component={ThreeDotScreen}
         options={{
           presentation: 'transparentModal',
           animation: 'slide_from_bottom',
