@@ -9,8 +9,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Dimensions } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { sendFeedback } from '../Redux/slices/feedSlice';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
 const ReelHCard = ({ reel, isVisible }) => {
+  const navigation = useNavigation();
+  const user = useSelector(state => state.auth.user);
   // vibe up / down things
   const dispatch = useDispatch();
   const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = reel;
@@ -88,7 +92,18 @@ const ReelHCard = ({ reel, isVisible }) => {
             <Text style={{ fontWeight: '600' }}>Follow</Text>
           </Pressable>
 
-          <Entypo name="dots-three-vertical" color="#fff" size={18} />
+          <Pressable
+            onPress={() =>
+              navigation.navigate('ThreeDotScreen', { postValue: reel })
+            }
+          >
+            <Entypo
+              style={{ marginTop: 4 }}
+              name="dots-three-vertical"
+              color="#5a5858"
+              size={18}
+            />
+          </Pressable>
         </View>
       </View>
       <View
@@ -100,18 +115,25 @@ const ReelHCard = ({ reel, isVisible }) => {
           paddingVertical: 5,
         }}
       >
-        <View style={{ flexDirection: 'row', gap: 15 }}>
+        <View
+          style={{ flexDirection: 'row', gap: 22, justifyContent: 'center' }}
+        >
           <Pressable
             onPress={() => handleVibeUp(reel._id)}
             style={{ flexDirection: 'row', gap: 5 }}
           >
             <FontAwesome
-              name={isVibedUp ? "thumbs-up" : "thumbs-o-up"}
-              size={24}
+              name={isVibedUp ? 'thumbs-up' : 'thumbs-o-up'}
+              size={21}
               color={isVibedUp ? '#3b82f6' : '#000'}
+              style={{ paddingTop: 3 }}
             />
             <Text
-              style={{ paddingTop: 6, color: isVibedUp ? '#3b82f6' : '#000' }}
+              style={{
+                paddingTop: 6,
+                fontSize: 13,
+                color: isVibedUp ? '#3b82f6' : '#000',
+              }}
             >
               Vibe Up
             </Text>
@@ -121,18 +143,23 @@ const ReelHCard = ({ reel, isVisible }) => {
               {vibesUpCount || 0}
             </Text>
           </Pressable>
+
           <Pressable
             onPress={() => handleVibeDown(reel._id)}
             style={{ flexDirection: 'row', gap: 5 }}
           >
             <FontAwesome
-               name={isVibedDown ? "thumbs-down" : "thumbs-o-down"}
-              style={{ paddingTop: 8 }}
+              name={isVibedDown ? 'thumbs-down' : 'thumbs-o-down'}
+              size={21}
+              style={{ paddingTop: 6 }}
               color={isVibedDown ? '#ef4444' : '#000'}
-              size={24}
             />
             <Text
-              style={{ paddingTop: 6, color: isVibedDown ? '#ef4444' : '#000' }}
+              style={{
+                paddingTop: 6,
+                fontSize: 13,
+                color: isVibedDown ? '#ef4444' : '#000',
+              }}
             >
               Vibe Down
             </Text>
@@ -142,10 +169,26 @@ const ReelHCard = ({ reel, isVisible }) => {
               {vibesDownCount || 0}
             </Text>
           </Pressable>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 15, marginTop: 6 }}>
-          <MaterialIcons name="comment" color="#000" size={24} />
-          <Feather name="send" color="#000" size={24} />
+          <Pressable
+            onPress={() =>
+              navigation.navigate('Comments', { postId: reel._id })
+            }
+            style={{ flexDirection: 'row', gap: 5, marginTop: 5 }}
+          >
+            <MaterialIcons name="comment" color="#000" size={21} />
+            <Text style={{ fontSize: 13 }}>{reel.commentsCount || 0}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() =>
+              navigation.navigate('ShareScreen', { postValue: reel })
+            }
+            style={{ flexDirection: 'row', marginTop: 5 }}
+          >
+            <Feather name="send" color="#000" size={21} />
+          </Pressable>
+          <Pressable style={{ flexDirection: 'row', marginTop: 5 }}>
+            <Feather name="bookmark" color="#000" size={21} />
+          </Pressable>
         </View>
       </View>
       <View
