@@ -15,7 +15,6 @@ import { useNavigation } from '@react-navigation/native';
 const ReelHCard = ({ reel, isVisible }) => {
   const navigation = useNavigation();
   const user = useSelector(state => state.auth.user);
-  // vibe up / down things
   const dispatch = useDispatch();
   const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = reel;
 

@@ -103,14 +103,17 @@ const currentUserId = useSelector(state => state.auth.user._id);
     }
   });
 
+
   useEffect(() => {
     if (!socket) return;
 
     const handleVibeUp = (data) => {
+      console.log("SOCKET VIBE UP", data);
       dispatch(
         updatePostFromSocket({
           postId: data.postId,
           vibesUp: data.vibesUp,
+          
         })
       );
     };
@@ -120,18 +123,34 @@ const currentUserId = useSelector(state => state.auth.user._id);
         updatePostFromSocket({
           postId: data.postId,
           vibesDown: data.vibesDown,
+         
         })
       );
     };
 
+    const handleCommentUpdate = (data) => {
+      dispatch(
+        updatePostFromSocket({
+          postId: data.postId,
+          commentsCount: data.comments.length, 
+        })
+      );
+    };
+
+  
     socket.on("postVibeUpdated", handleVibeUp);
     socket.on("postVibeDownUpdated", handleVibeDown);
+    socket.on("postCommentUpdated", handleCommentUpdate); 
 
     return () => {
+      
       socket.off("postVibeUpdated", handleVibeUp);
       socket.off("postVibeDownUpdated", handleVibeDown);
+      socket.off("postCommentUpdated", handleCommentUpdate);
     };
-  }, [socket, dispatch]);
+  }, [socket]);
+
+
 
   if (initialLoading) {
     return <HomeLoadPage />;

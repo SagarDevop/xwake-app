@@ -57,7 +57,7 @@ const feedSlice = createSlice({
   reducers: {
     // For socket updat
     updatePostFromSocket: (state, action) => {
-      const { postId, vibesUp, vibesDown } = action.payload;
+      const { postId, vibesUp, vibesDown, commentsCount } = action.payload;
 
       const index = state.posts.findIndex(item => item._id === postId);
       if (index === -1) return;
@@ -71,6 +71,11 @@ const feedSlice = createSlice({
         state.posts[index].vibesDown = vibesDown;
         state.posts[index].vibesDownCount = vibesDown.length;
       }
+
+      if (commentsCount !== undefined) {
+        state.posts[index].commentsCount = commentsCount;
+      }
+      
     },
   },
   extraReducers: builder => {

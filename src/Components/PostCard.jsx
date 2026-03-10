@@ -15,6 +15,7 @@ const PostCard = ({ post}) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const currentUserId = user?._id;
+  
 
   const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = post;
 

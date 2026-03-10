@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, use } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import api from '../api';
 
 const { height } = Dimensions.get('window');
 
@@ -30,21 +32,137 @@ const CommentsScreen = () => {
   const route = useRoute();
   const { postId } = route.params;
   const userProfilePic = useSelector(state => state.auth.user?.profilePic?.url);
-  const [inputText, setInputText] = useState('');
-
   const quickEmojis = ['❤️', '🙌', '🔥', '👏', '😍'];
+  const user = useSelector(state => state.auth.user);
 
-  const [comments] = useState([
-    { id: '1', user: 'John', text: 'Nice post!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/1.jpg'},
-    { id: '2', user: 'John', text: 'Nice post1!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/2.jpg'},
-    { id: '3', user: 'John', text: 'Nice post2!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/3.jpg'},
-    { id: '4', user: 'John', text: 'Nice post3!', type: 'comment', url: 'https://randomuser.me/api/portraits/men/4.jpg'},
-    { id: '5', user: 'John', text: 'Nice post!4', type: 'comment', url: 'https://randomuser.me/api/portraits/men/5.jpg'},
-    { id: '6', user: 'John', text: 'Nice post!5', type: 'comment', url: 'https://randomuser.me/api/portraits/men/6.jpg'},
-    { id: '7', user: 'John', text: 'Nice post!6', type: 'comment', url: 'https://randomuser.me/api/portraits/men/7.jpg'},
-    { id: '8', user: 'John', text: 'Nice post!7', type: 'comment', url: 'https://randomuser.me/api/portraits/men/8.jpg'},
-    { id: '9', user: 'Alex', text: 'Agree ', type: 'reply', url: 'https://randomuser.me/api/portraits/men/9.jpg'},
-  ]);
+  const [inputText, setInputText] = useState('');
+  const [comments, setComments] = useState([])
+  const [commentLoading, setCommentLoading] = useState(true);
+  const [replyingTo, setReplyingTo] = useState(null);
+
+  useEffect(() =>{
+    const fetchComments = async () => {
+      try {
+        const response = await api.get(`/api/comment/${postId}`);
+        console.log('Fetched comments:', response.data.comments);
+        setComments(response.data.comments);
+        setCommentLoading(false);
+      }
+      catch(err){
+        console.log('Error fetching comments:', err);
+        setCommentLoading(false);
+      }
+    }
+    fetchComments();
+  }, [postId])
+
+  const handleAddComment = async () => {
+    if (!inputText.trim()) return;
+
+    const textToPost = inputText;
+    setInputText('');
+
+    const parentId = replyingTo ? replyingTo.commentId : null;
+
+    const optimisticComment = {
+      _id: Math.random().toString(),
+      comment: textToPost,
+      createdAt: new Date().toISOString(),
+      user: {
+        _id: user._id,
+        username: user.username,
+        profilePic: { url: user?.profilePic?.url },
+      },
+      type: replyingTo ? 'reply' : 'comment',
+      parentComment: parentId,
+      replies: [],
+    };
+
+    
+    if (parentId) {
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c._id === parentId) {
+            return {
+              ...c,
+              replies: [...(c.replies || []), optimisticComment],
+            };
+          }
+          return c;
+        })
+      );
+    } else {
+      setComments((prev) => [optimisticComment, ...prev]);
+    }
+
+    setReplyingTo(null);
+
+    
+    try {
+      const response = await api.post(`/api/comment/${postId}`, {
+        comment: textToPost,
+        parentComment: parentId,
+      });
+
+      if (parentId) {
+        setComments((prev) =>
+          prev.map((c) => {
+            if (c._id === parentId) {
+              return {
+                ...c,
+                replies: c.replies.map((r) =>
+                  r._id === optimisticComment._id ? response.data.comment : r
+                ),
+              };
+            }
+            return c;
+          })
+        );
+      } else {
+        setComments((prev) =>
+          prev.map((c) => (c._id === optimisticComment._id ? response.data.comment : c))
+        );
+      }
+      
+    } catch (error) {
+      console.log('Error posting comment:', error);
+      
+    
+      if (parentId) {
+        setComments((prev) =>
+          prev.map((c) => {
+            if (c._id === parentId) {
+              return {
+                ...c,
+                replies: c.replies.filter((r) => r._id !== optimisticComment._id),
+              };
+            }
+            return c;
+          })
+        );
+      } else {
+        setComments((prev) => prev.filter((c) => c._id !== optimisticComment._id));
+      }
+      
+      alert(error.response?.data?.message || 'Failed to post comment');
+    }
+  };
+
+  const timeAgo = iso => {
+    const seconds = Math.floor((new Date() - new Date(iso)) / 1000);
+
+    if (seconds < 60) return `${seconds}s`;
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+
+    const days = Math.floor(hours / 24);
+    return `${days}d`;
+  };
+  
 
   const translateY = useSharedValue(0);
 
@@ -72,28 +190,13 @@ const CommentsScreen = () => {
     transform: [{ translateY: translateY.value }],
   }));
 
-  const renderItem = useCallback(({ item }) => {
+ const renderItem = useCallback(({ item }) => {
     return (
-      <View
-        style={[
-          styles.commentContainer,
-          item.type === 'reply' && styles.replyContainer,
-        ]}
-      >
-        <View style={styles.commentContent}>
-          <Image source={{ uri: item.url }} style={{height: 38, width:38, borderRadius:100}} />
-          <View style={styles.commentTextContainer}>
-            <View style={{flexDirection:'row', gap:10}}>
-              <Text style={styles.username}>{item.user}</Text>
-              <Text style={{color:"#b4b4b4", fontSize:12}}>1h</Text>
-              </View>
-            <Text style={{fontSize:14, marginTop: -4}}>{item.text}</Text>
-            <Pressable>
-              <Text style={{fontSize:13, color:"#949494"}}>Reply</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
+      <CommentItem 
+        item={item} 
+        setReplyingTo={setReplyingTo} 
+        timeAgo={timeAgo} 
+      />
     );
   }, []);
 
@@ -118,15 +221,36 @@ const CommentsScreen = () => {
               </View>
             </View>
           </GestureDetector>
-
-          <FlashList
-            data={comments}
-            renderItem={renderItem}
-            estimatedItemSize={70}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingBottom: 10 }}
-            style={{ flex: 1 }}
-          />
+          
+          {/* Replaced logic starting from commentLoading */}
+          {commentLoading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text>Loading comments...</Text>
+            </View>
+          ) : comments.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <FontAwesome name="comments-o" size={60} color="#d3d3d3" />
+              <Text style={styles.emptyTitle}>No comments yet</Text>
+              <Text style={styles.emptySubtitle}>Be the first to share your thoughts!</Text>
+            </View>
+          ) : (
+            <FlashList
+              data={comments}
+              renderItem={renderItem}
+              estimatedItemSize={70}
+              keyExtractor={item => item.id || item._id} 
+              contentContainerStyle={{ paddingBottom: 10 }}
+              style={{ flex: 1 }}
+            />
+          )}
+          {replyingTo && (
+            <View style={styles.replyingBanner}>
+              <Text style={styles.replyingText}>Replying to {replyingTo.username}</Text>
+              <Pressable onPress={() => setReplyingTo(null)}>
+                <AntDesign name="close" size={16} color="#666" />
+              </Pressable>
+            </View>
+          )}
           <View style={styles.emojiRow}>
             {quickEmojis.map((emoji, index) => (
               <Pressable
@@ -149,10 +273,11 @@ const CommentsScreen = () => {
               style={styles.input}
               value={inputText}
               onChangeText={setInputText} 
+              onSubmitEditing={handleAddComment}
             />
             <Pressable
               onPress={() => {
-                
+                handleAddComment();
                 console.log('Posting:', inputText);
                 setInputText(''); 
               }}
@@ -258,4 +383,107 @@ const styles = StyleSheet.create({
     margin: 8,
 
   },
+ 
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#949494',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  // Add these inside your styles object:
+  replyingBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderTopWidth: 0.5,
+    borderColor: '#ddd',
+  },
+  replyingText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
 });
+
+
+// Add this right above your CommentsScreen component
+const CommentItem = ({ item, setReplyingTo, timeAgo }) => {
+  const [showReplies, setShowReplies] = useState(false);
+
+  return (
+    <View style={styles.commentContainer}>
+      {/* --- PARENT COMMENT --- */}
+      <View style={styles.commentContent}>
+        <Image source={{ uri: item.user?.profilePic?.url }} style={{ height: 38, width: 38, borderRadius: 100 }} />
+        <View style={styles.commentTextContainer}>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <Text style={styles.username}>{item.user?.username}</Text>
+            <Text style={{ color: "#b4b4b4", fontSize: 11 }}>{timeAgo(item.createdAt)}</Text>
+          </View>
+          <Text style={{ fontSize: 14, marginTop: 2 }}>{item.comment}</Text>
+          
+          <Pressable onPress={() => setReplyingTo({ commentId: item._id, username: item.user.username })}>
+            <Text style={{ fontSize: 13, color: "#949494", marginTop: 4, fontWeight: '500' }}>Reply</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* --- NESTED REPLIES --- */}
+      {item.replies && item.replies.length > 0 && (
+        <View style={{ marginLeft: 48, marginTop: 10 }}>
+          {!showReplies ? (
+            // Toggle to open replies (Like Instagram's "---- View 2 replies")
+            <Pressable onPress={() => setShowReplies(true)} style={styles.viewRepliesBtn}>
+              <View style={styles.replyLine} />
+              <Text style={styles.viewRepliesText}>
+                View {item.replies.length} {item.replies.length === 1 ? 'reply' : 'replies'}
+              </Text>
+            </Pressable>
+          ) : (
+            // The actual replies
+            <View>
+              {item.replies.map((reply) => (
+                <View key={reply._id} style={[styles.commentContent, { marginBottom: 15 }]}>
+                  <Image source={{ uri: reply.user?.profilePic?.url }} style={{ height: 30, width: 30, borderRadius: 100 }} />
+                  <View style={[styles.commentTextContainer, { flex: 1 }]}>
+                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                      <Text style={styles.username}>{reply.user?.username}</Text>
+                      <Text style={{ color: "#b4b4b4", fontSize: 11 }}>{timeAgo(reply.createdAt)}</Text>
+                    </View>
+                    <Text style={{ fontSize: 14, marginTop: 2 }}>{reply.comment}</Text>
+                    
+                    {/* Notice how replying to a reply still attaches to the root commentId (item._id) */}
+                    <Pressable onPress={() => setReplyingTo({ commentId: item._id, username: reply.user.username })}>
+                      <Text style={{ fontSize: 13, color: "#949494", marginTop: 4, fontWeight: '500' }}>Reply</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+              
+              // Toggle to close replies
+              <Pressable onPress={() => setShowReplies(false)} style={styles.viewRepliesBtn}>
+                <View style={styles.replyLine} />
+                <Text style={styles.viewRepliesText}>Hide replies</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      )}
+    </View>
+  );
+};
