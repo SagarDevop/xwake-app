@@ -9,36 +9,50 @@ import {
 import React from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Octicons from 'react-native-vector-icons/Octicons';
-import ProfileTabs from '../Navigation/ProfileTabs'
+import ProfileTabs from '../Navigation/ProfileTabs';
+import { useSelector } from 'react-redux';
+import {isSameId, includesId} from '../Utils/Idutils'
 
 const Profile = () => {
+  const user = useSelector(state => state.auth.user);
+  const posts = useSelector(state => state.feed.posts);
+
+  const myPosts = posts?.filter((p) => isSameId(p.owner?._id, user._id));
+  console.log('here are my post', myPosts)
+  console.log('user in profile', user);
+
+  //states
+
+
   return (
-    <View style={{ flex: 1, backgroundColor:'#fff' }}>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={styles.header}>
         <AntDesign name="plus" color="#000" size={24} />
-        <Text style={{ fontSize: 17, fontWeight: '500' }}>SagarDevop</Text>
+        <Text style={{ fontSize: 17, fontWeight: '500' }}>
+          {user?.username}
+        </Text>
         <Octicons name="three-bars" color="#000" size={20} />
       </View>
       <View style={styles.info}>
         <Image
           source={{
-            uri: 'https://images.unsplash.com/photo-1708034677699-6f39d9c59f6e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8YW5pbWUlMjB3YWxscGFwZXJ8ZW58MHx8MHx8fDA%3D',
+            uri: user?.profilePic?.url,
           }}
           style={{ height: 80, width: 80, borderRadius: 100 }}
         />
         <View style={{ height: 80, flexDirection: 'column', gap: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: '500' }}>Sagar</Text>
+          <Text style={{ fontSize: 16, fontWeight: '500' }}>{user?.name}</Text>
           <View style={{ flexDirection: 'row', gap: 33 }}>
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '500' }}>10</Text>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>{myPosts.length}</Text>
               <Text style={{ fontSize: 14, fontWeight: '400' }}>posts</Text>
             </View>
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '500' }}>20</Text>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>{user.followers.length}</Text>
               <Text style={{ fontSize: 14, fontWeight: '400' }}>followers</Text>
             </View>
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '500' }}>121</Text>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>{user.followings.length}</Text>
               <Text style={{ fontSize: 14, fontWeight: '400' }}>following</Text>
             </View>
           </View>
@@ -53,7 +67,7 @@ const Profile = () => {
             fontSize: 15,
           }}
         >
-          "I am sagar making this plateform for you" Thnakyou for you support
+          {user?.bio || "spare something about you"}
         </Text>
       </View>
       <View style={styles.auradash}>
@@ -66,13 +80,11 @@ const Profile = () => {
         <Pressable style={styles.btn}>
           <Text style={{ fontWeight: '500' }}>Edit profile</Text>
         </Pressable>
-        <Pressable
-          style={styles.btn}
-        >
+        <Pressable style={styles.btn}>
           <Text style={{ fontWeight: '500' }}>Share profile</Text>
         </Pressable>
       </View>
-      <ProfileTabs/>
+      <ProfileTabs data ={myPosts} />
     </View>
   );
 };
@@ -111,7 +123,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 5,
     marginHorizontal: 20,
-    marginBottom:40
+    marginBottom: 40,
   },
   btn: {
     width: 157,

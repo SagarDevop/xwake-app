@@ -1,6 +1,5 @@
 import React from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import { View, Text } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Feather from 'react-native-vector-icons/Feather'
 import Post from '../Components/Post'
@@ -9,10 +8,11 @@ import Saved from '../Components/Saved'
 
 const Tab = createMaterialTopTabNavigator()
 
-// Screens
+const ProfileTabs = ({ data }) => {
 
+ 
+  const reelData = data?.filter(item => item.type === "reel")
 
-const ProfileTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -23,7 +23,7 @@ const ProfileTabs = () => {
     >
       <Tab.Screen
         name="Post"
-        component={Post}
+        children={() => <Post data={data} />}
         options={{
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -37,7 +37,7 @@ const ProfileTabs = () => {
 
       <Tab.Screen
         name="Reel"
-        component={Reel}
+        children={() => <Reel data={reelData} />}
         options={{
           tabBarIcon: ({ focused }) => (
             <Ionicons

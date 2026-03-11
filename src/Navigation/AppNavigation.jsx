@@ -27,7 +27,6 @@ const isAuth = useSelector(state => state.auth.isAuth);
 const loading = useSelector(state => state.auth.loading);
 
 const userprofile = user?.profilePic?.url
-console.log("USER PROFILE PIC:", userprofile);
 
 
   return (
