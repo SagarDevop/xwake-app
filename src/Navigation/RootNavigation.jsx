@@ -7,6 +7,7 @@ import CommentsScreen from '../Components/CommentsScreen';
 import ShareScreen from '../Components/ShareScreen';
 import ThreeDotScreen from '../Components/ThreeDotScreen';
 import PostList from '../Screens/PostList';
+import ReelsList from '../Screens/ReelsList'
 import FollowNetworkScreen from '../Screens/FollowNetworkScreen';
 import { useSelector } from 'react-redux';
 
@@ -36,6 +37,14 @@ const RootNavigation = () => {
         component={PostList}
         options={{
           title: 'Posts',
+          headerTransparent: true,
+        }}
+      />
+      <Stack.Screen
+        name="ReelsList"
+        component={ReelsList}
+        options={{
+          title: 'Reels',
           headerTransparent: true,
         }}
       />

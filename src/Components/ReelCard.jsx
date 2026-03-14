@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Image, Pressable, Dimensions } from 'react-native';
 import React from 'react';
 import Video from 'react-native-video';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -9,7 +9,7 @@ const ReelCard = ({ reel, isActive }) => {
 
   
   return (
-    <View style={{ height: 675 }}>
+    <View style={{ height: Dimensions.get('window').height }}>
       <Video
         source={{ uri: reel.post.url || "https://www.w3schools.com/html/movie.mp4" }}
         style={{ flex: 1 }}
