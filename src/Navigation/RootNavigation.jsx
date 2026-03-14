@@ -8,6 +8,7 @@ import ShareScreen from '../Components/ShareScreen';
 import ThreeDotScreen from '../Components/ThreeDotScreen';
 import PostList from '../Screens/PostList';
 import ReelsList from '../Screens/ReelsList'
+import SavedItemList from '../Screens/SavedItemList'
 import FollowNetworkScreen from '../Screens/FollowNetworkScreen';
 import { useSelector } from 'react-redux';
 
@@ -45,6 +46,14 @@ const RootNavigation = () => {
         component={ReelsList}
         options={{
           title: 'Reels',
+          headerTransparent: true,
+        }}
+      />
+        <Stack.Screen
+        name="SavedItemList"
+        component={SavedItemList}
+        options={{
+          title: 'Saved',
           headerTransparent: true,
         }}
       />

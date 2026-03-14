@@ -1,13 +1,14 @@
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import api from '../api';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-
+import { useNavigation } from '@react-navigation/native';
 
 const   Saved = () => {
+  const navigation = useNavigation()
   const user = useSelector(state => state.auth.user);
 
 
@@ -47,7 +48,9 @@ const   Saved = () => {
       };
 
       return (
-        <View style={styles.imageContainer}>
+        <Pressable  style={styles.imageContainer}  onPress={() => navigation.navigate('SavedItemList', { selectedpost: item,
+        postIds: savedPosts.map(p => p._id)
+       })}>
           <Image
             style={styles.image}
             source={{
@@ -55,7 +58,7 @@ const   Saved = () => {
             }}
           />
           <View style={styles.reelOverlay}>
-            {/* Note: You might want to change color="#000" to "white" so it matches your text! */}
+            
             <AntDesign name="eyeo" color="white" size={18} /> 
             <Text style={styles.viewCountText}>{viewCount}</Text>
           </View>
@@ -70,7 +73,7 @@ const   Saved = () => {
               />
             </View>
           )}
-        </View>
+        </Pressable>
       );
     };
 
