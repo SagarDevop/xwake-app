@@ -1,12 +1,1 @@
-  THING I HAVE TO DO ---
-
-Socket are not working i have to talk to prince for this how these are working
-
-i have to make post share and three dot working as they are now only ui 
-
-prince se bat krni reel aur post ke data ke liye ki data kaise arha reels aur feed me
-
-when i am uploading it is uploading in cloudnary but i get the saved/ previos image in imagw kit 
-problem which i think you not change uploading url it is still upoad in cloudnary 
-
-ab to upload bhi nhi ho rha
+today i have to make reel and saved list for user

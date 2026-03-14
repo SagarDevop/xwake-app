@@ -11,14 +11,15 @@ const Post = ({ data }) => {
 
     return (
       <Pressable  style={styles.imageContainer} onPress={() => navigation.navigate('PostList', { selectedpost: item,
-        AllPosts: data
+        postIds: data.map(p => p._id)
        })}>
-        <Image
+       <Image
           style={styles.image}
           source={{
-            uri: item.post.url.replace('.mp4', '.jpg'),
+            uri: isReel ? `${item.post.url}/ik-thumbnail.jpg` : item.post.url,
           }}
         />
+
         <View style={styles.reelOverlay}>
           <AntDesign name="eyeo" color="#000" size={18} />
           <Text style={styles.viewCountText}>{viewCount}</Text>

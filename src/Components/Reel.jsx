@@ -14,7 +14,7 @@ const   Reel = ({data}) => {
           <Image
             style={styles.image}
             source={{
-              uri: item.post.url.replace('.mp4', '.jpg'),
+              uri: `${item.post.url}/ik-thumbnail.jpg`,
             }}
           />
           <View style={styles.reelOverlay}>

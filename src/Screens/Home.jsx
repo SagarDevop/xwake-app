@@ -14,7 +14,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import PostCard from '../Components/PostCard';
 import ReelHCard from '../Components/ReelHCard';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { logout } from '../Redux/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
@@ -50,6 +50,7 @@ const story = [
 
 const Home = () => {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const [showToast, setShowToast] = useState(false);
   const [visibleId, setVisibleId] = useState(null);
@@ -84,10 +85,10 @@ const currentUserId = useSelector(state => state.auth.user._id);
       if (item.type === 'post') {
         return <PostCard post={item}  />;
       } else {
-        return <ReelHCard reel={item} isVisible={visibleId === item._id} />;
+        return <ReelHCard reel={item} isVisible={visibleId === item._id && isFocused} />;
       }
     },
-    [visibleId],
+    [visibleId, isFocused],
   );
 
   //
