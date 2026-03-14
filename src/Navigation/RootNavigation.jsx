@@ -6,10 +6,15 @@ import Notification from '../Screens/Notification';
 import CommentsScreen from '../Components/CommentsScreen';
 import ShareScreen from '../Components/ShareScreen';
 import ThreeDotScreen from '../Components/ThreeDotScreen';
+import PostList from '../Screens/PostList';
+import FollowNetworkScreen from '../Screens/FollowNetworkScreen';
+import { useSelector } from 'react-redux';
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigation = () => {
+  const user = useSelector(state => state.auth.user);
+  console.log('hi dwe', user)
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -26,8 +31,20 @@ const RootNavigation = () => {
           headerTransparent: true,
         }}
       />
+      <Stack.Screen
+        name="PostList"
+        component={PostList}
+        options={{
+          title: 'Posts',
+          headerTransparent: true,
+        }}
+      />
+      <Stack.Screen
+        name="FollowNetwork"
+        component={FollowNetworkScreen}
+        options={{ title: user.username }} 
+      />
 
-    
       <Stack.Screen
         name="Comments"
         component={CommentsScreen}

@@ -5,7 +5,6 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 
 const   Reel = ({data}) => {
-  console.log("here is reel data in post of profile", data)
 
   const renderItem = ({ item }) => {
       const viewCount = item.views;

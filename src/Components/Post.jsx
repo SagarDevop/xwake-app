@@ -1,14 +1,18 @@
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 const Post = ({ data }) => {
+  const navigation = useNavigation();
   const renderItem = ({ item }) => {
     const isReel = item.type === 'reel';
     const viewCount = item.views;
 
     return (
-      <View style={styles.imageContainer}>
+      <Pressable  style={styles.imageContainer} onPress={() => navigation.navigate('PostList', { selectedpost: item,
+        AllPosts: data
+       })}>
         <Image
           style={styles.image}
           source={{
@@ -30,7 +34,7 @@ const Post = ({ data }) => {
             />
           </View>
         )}
-      </View>
+      </Pressable>
     );
   };
 

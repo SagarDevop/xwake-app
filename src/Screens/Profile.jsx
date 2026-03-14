@@ -6,23 +6,40 @@ import {
   Text,
   View,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Octicons from 'react-native-vector-icons/Octicons';
 import ProfileTabs from '../Navigation/ProfileTabs';
 import { useSelector } from 'react-redux';
-import {isSameId, includesId} from '../Utils/Idutils'
+import { isSameId, includesId } from '../Utils/Idutils';
+import { useState } from 'react';
+import api from '../api';
+import { useNavigation } from '@react-navigation/native';
 
 const Profile = () => {
+  const navigation = useNavigation()
   const user = useSelector(state => state.auth.user);
   const posts = useSelector(state => state.feed.posts);
+  console.log('user from profile', user);
 
-  const myPosts = posts?.filter((p) => isSameId(p.owner?._id, user._id));
-  console.log('here are my post', myPosts)
-  console.log('user in profile', user);
+  const myPosts = posts?.filter(p => isSameId(p.owner?._id, user._id));
 
   //states
+  const [followersData, setFollowersData] = useState([]);
+  const [followingsData, setFollowingsData] = useState([]);
 
+  const fetchFollowData = async () => {
+    try {
+      const response = await api.get("/api/user/followdata/" + user._id + "?t=" + Date.now());
+      setFollowersData(response.data.followers);
+      setFollowingsData(response.data.followings);
+    } catch (error) {
+      console.error('Error fetching followers data:', error);
+    }  
+  };
+  useEffect(() => {
+    fetchFollowData();  
+  }, [user?.followers?.length, user?.followings?.length]);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -44,17 +61,36 @@ const Profile = () => {
           <Text style={{ fontSize: 16, fontWeight: '500' }}>{user?.name}</Text>
           <View style={{ flexDirection: 'row', gap: 33 }}>
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '500' }}>{myPosts.length}</Text>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>
+                {myPosts.length}
+              </Text>
               <Text style={{ fontSize: 14, fontWeight: '400' }}>posts</Text>
             </View>
-            <View>
-              <Text style={{ fontSize: 16, fontWeight: '500' }}>{user.followers.length}</Text>
+            <View style={{ flexDirection: 'row', gap: 33 }}>
+            
+            <Pressable onPress={() => navigation.navigate('FollowNetwork', { 
+                initialTab: 'followers', 
+                followers: followersData, 
+                followings: followingsData 
+            })}>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>
+                {user.followers.length}
+              </Text>
               <Text style={{ fontSize: 14, fontWeight: '400' }}>followers</Text>
-            </View>
-            <View>
-              <Text style={{ fontSize: 16, fontWeight: '500' }}>{user.followings.length}</Text>
+            </Pressable>
+
+
+            <Pressable onPress={() => navigation.navigate('FollowNetwork', { 
+                initialTab: 'following', 
+                followers: followersData, 
+                followings: followingsData 
+            })}>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>
+                {user.followings.length}
+              </Text>
               <Text style={{ fontSize: 14, fontWeight: '400' }}>following</Text>
-            </View>
+            </Pressable>
+          </View>
           </View>
         </View>
       </View>
@@ -67,7 +103,7 @@ const Profile = () => {
             fontSize: 15,
           }}
         >
-          {user?.bio || "spare something about you"}
+          {user?.bio || 'spare something about you'}
         </Text>
       </View>
       <View style={styles.auradash}>
@@ -84,7 +120,7 @@ const Profile = () => {
           <Text style={{ fontWeight: '500' }}>Share profile</Text>
         </Pressable>
       </View>
-      <ProfileTabs data ={myPosts} />
+      <ProfileTabs data={myPosts} />
     </View>
   );
 };

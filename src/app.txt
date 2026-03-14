@@ -8,3 +8,5 @@ prince se bat krni reel aur post ke data ke liye ki data kaise arha reels aur fe
 
 when i am uploading it is uploading in cloudnary but i get the saved/ previos image in imagw kit 
 problem which i think you not change uploading url it is still upoad in cloudnary 
+
+ab to upload bhi nhi ho rha

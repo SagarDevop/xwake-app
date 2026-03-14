@@ -10,7 +10,6 @@ import Message from '../Screens/Message';
 import Search from '../Screens/Search';
 import AuraX from '../Screens/AuraX';
 import Profile from '../Screens/Profile';
-
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

@@ -58,7 +58,6 @@ const Home = () => {
 
   const { posts, page, hasMore, initialLoading, paginationLoading } =
     useSelector(state => state.feed);
-    console.log("post from feed",posts)
   const userAvatar = useSelector(state => state.auth.user.profilePic.url);
   
 const currentUserId = useSelector(state => state.auth.user._id);
@@ -79,8 +78,6 @@ const currentUserId = useSelector(state => state.auth.user._id);
       console.log(error);
     }
   };
-
-  // render on time
 
   const renderItem = useCallback(
     ({ item }) => {
