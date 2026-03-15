@@ -17,6 +17,7 @@ const ReelsList = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const isFocused = useIsFocused();
   const [reels, setReels] = useState(AllReels);
+  const flashListRef = useRef();
 
   const viewConfigRef = useRef({
     viewAreaCoveragePercentThreshold: 80,
@@ -45,25 +46,33 @@ const ReelsList = () => {
     [reels, selectedReel._id],
   );
 
+  const data = headerreelExists ? [selectedReel, ...otherreels] : otherreels;
+
+  const handlePress = (index) => {
+    setActiveIndex(index);
+    flashListRef.current.scrollToIndex({ index, animated: true });
+  };
+
   const renderItem = React.useCallback(
     ({ item, index }) => {
-      const adjustedIndex = index + (headerreelExists ? 1 : 0);
       return (
-        <ReelCard reel={item} isActive={adjustedIndex === activeIndex && isFocused} />
+        <ReelCard 
+          reel={item} 
+          isActive={index === activeIndex && isFocused} 
+          onPress={() => handlePress(index)} 
+        />
       );
     },
-    [activeIndex, isFocused, headerreelExists],
+    [activeIndex, isFocused],
   );
 
   return (
     <View style={{ flex: 1 }}>
       <FlashList
-        data={otherreels}
+        ref={flashListRef}
+        data={data}
         estimatedItemSize={height}
         keyExtractor={item => item._id}
-        ListHeaderComponent={
-          headerreelExists ? <ReelCard reel={selectedReel} isActive={0 === activeIndex && isFocused} /> : null
-        }
         renderItem={renderItem}
         pagingEnabled
         removeClippedSubviews

@@ -5,19 +5,19 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const ReelCard = ({ reel, isActive }) => {
+const ReelCard = ({ reel, isActive, onPress }) => {
 
   
   return (
-    <View style={{ height: Dimensions.get('window').height }}>
+    <Pressable onPress={onPress} style={{ height: Dimensions.get('window').height }}>
       <Video
         source={{ uri: reel.post.url || "https://www.w3schools.com/html/movie.mp4" }}
         style={{ flex: 1 }}
         resizeMode="cover"
         repeat
-        paused={!isActive} //THIS CONTROLS PLAY / PAUSE
+        paused={!isActive}
       />
-      {/* user info  */}
+   
       <View style={styles.topHeader}>
         <View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -49,9 +49,7 @@ const ReelCard = ({ reel, isActive }) => {
         />
       </View>
 
-      {/* user info  */}
-
-      {/* right side btn */}
+      
 
       <View style={styles.rightBtn}>
         <View style={{ flexDirection: 'column', gap: 5 }}>
@@ -76,15 +74,16 @@ const ReelCard = ({ reel, isActive }) => {
         </View>
       </View>
 
-      {/* right side btn */}
-    </View>
+      
+    </Pressable>
   );
 };
 
 export default React.memo(ReelCard, (prevProps, nextProps) => {
   return (
     prevProps.isActive === nextProps.isActive &&
-    prevProps.reel._id === nextProps.reel._id
+    prevProps.reel._id === nextProps.reel._id &&
+    prevProps.onPress === nextProps.onPress
   );
 });
 
