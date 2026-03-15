@@ -12,11 +12,15 @@ import { useSelector } from 'react-redux';
 const SavedItemList = () => {
   const route = useRoute();
   const selectedpost = route.params.selectedpost;
-  const postIds = route.params.postIds;
+  const AllPosts = route.params.AllPosts;
   const isFocused = useIsFocused();
   const { posts } = useSelector(state => state.feed);
-  const AllPosts = posts.filter(p => postIds.includes(p._id));
+  const updatedAllPosts = AllPosts.map(savedPost => {
+    const updated = posts.find(p => p._id === savedPost._id);
+    return updated || savedPost;
+  });
   
+  console.log('saved post', AllPosts)
 
   const [visibleId, setVisibleId] = useState(null);
 
@@ -25,14 +29,14 @@ const SavedItemList = () => {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    if (!hasScrolled && AllPosts.length > 0 && selectedpost) {
-      const index = AllPosts.findIndex(p => p._id === selectedpost._id);
+    if (!hasScrolled && updatedAllPosts.length > 0 && selectedpost) {
+      const index = updatedAllPosts.findIndex(p => p._id === selectedpost._id);
       if (index !== -1) {
         listRef.current?.scrollToIndex({ index, animated: false });
         setHasScrolled(true);
       }
     }
-  }, [AllPosts, selectedpost, hasScrolled]);
+  }, [updatedAllPosts, selectedpost, hasScrolled]);
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 80,
@@ -60,7 +64,7 @@ const SavedItemList = () => {
       <FlashList
       ref={listRef}
       style={{marginTop:55}}
-      data={AllPosts}
+      data={updatedAllPosts}
       itemKeyExtractor={item => item._id}
       renderItem={renderItem}
       estimatedItemSize={500}

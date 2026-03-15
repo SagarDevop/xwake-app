@@ -2,6 +2,7 @@ import {
   Image,
   ImageBackground,
   Pressable,
+  ScrollViewComponent,
   StyleSheet,
   Text,
   View,
@@ -120,7 +121,9 @@ const Profile = () => {
           <Text style={{ fontWeight: '500' }}>Share profile</Text>
         </Pressable>
       </View>
-      <ProfileTabs data={myPosts} />
+     
+        <ProfileTabs data={myPosts} /> 
+  
     </View>
   );
 };

@@ -37,19 +37,19 @@ const   Saved = () => {
       const isReel = item.type === 'reel';
       const viewCount = item.views;
   
-      // Determine the correct image URL based on whether it's a post or a reel
+     
       const getImageUrl = () => {
         if (isReel) {
-          // ImageKit way to extract a thumbnail from a video
+         
           return `${item.post.url}/ik-thumbnail.jpg`; 
         }
-        // If it's a regular post, just use the normal URL
+       
         return item.post.url;
       };
 
       return (
         <Pressable  style={styles.imageContainer}  onPress={() => navigation.navigate('SavedItemList', { selectedpost: item,
-        postIds: savedPosts.map(p => p._id)
+        AllPosts: savedPosts
        })}>
           <Image
             style={styles.image}
