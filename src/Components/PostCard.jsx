@@ -9,13 +9,13 @@ import { useDispatch } from 'react-redux';
 import { sendFeedback } from '../Redux/slices/feedSlice';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import { followUser } from '../Redux/slices/authSlice';
 
-const PostCard = ({ post}) => {
+const PostCard = ({ post }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const currentUserId = user?._id;
-  
 
   const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = post;
 
@@ -37,7 +37,21 @@ const PostCard = ({ post}) => {
     );
   };
   //states
-  const [isFollowing, setIsFollowing] = useState(false);
+  
+  const followingList = user?.followings || user?.following || [];
+  const isFollowing = followingList.some(
+    item => item === post.owner._id || item?._id === post.owner._id,
+  );
+
+  
+  const [optimisticFollow, setOptimisticFollow] = useState(false);
+
+  const handleFollow = userId => {
+    setOptimisticFollow(true); 
+    dispatch(followUser(userId));
+  };
+
+  const myPost = post.owner._id === currentUserId;
 
   const timeAgo = iso => {
     const seconds = Math.floor((new Date() - new Date(iso)) / 1000);
@@ -94,22 +108,31 @@ const PostCard = ({ post}) => {
           </View>
         </View>
         <View style={{ flexDirection: 'row', gap: 20, marginTop: 5 }}>
+         
+          {!myPost && (!isFollowing || optimisticFollow) && (
+            <Pressable
+              onPress={() => handleFollow(post.owner._id)}
+              disabled={optimisticFollow} 
+              style={{
+                backgroundColor:
+                  isFollowing || optimisticFollow ? '#d0d0d0' : '#e7e7e7',
+                marginBottom: 14,
+                paddingHorizontal: 14,
+                paddingVertical: 5,
+                borderRadius: 10,
+                elevation: 3,
+              }}
+            >
+              <Text style={{ fontWeight: '600', fontSize: 15 }}>
+                {isFollowing || optimisticFollow ? 'Following' : 'Follow'}
+              </Text>
+            </Pressable>
+          )}
           <Pressable
-            onPress={() => setIsFollowing(prev => !prev)}
-            style={{
-              backgroundColor: isFollowing ? '#d0d0d0' : '#e7e7e7',
-              marginBottom: 14,
-              paddingHorizontal: 14,
-              paddingVertical: 5,
-              borderRadius: 10,
-              elevation: 3,
-            }}
+            onPress={() =>
+              navigation.navigate('ThreeDotScreen', { postValue: post })
+            }
           >
-            <Text style={{ fontWeight: '600', fontSize: 15 }}>
-              {isFollowing ? 'Following' : 'Follow'}
-            </Text>
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate('ThreeDotScreen', { postValue: post })}>
             <Entypo
               style={{ marginTop: 4 }}
               name="dots-three-vertical"
@@ -136,19 +159,25 @@ const PostCard = ({ post}) => {
           paddingVertical: 5,
         }}
       >
-        <View style={{ flexDirection: 'row', gap: 22, justifyContent:'center' }}>
+        <View
+          style={{ flexDirection: 'row', gap: 22, justifyContent: 'center' }}
+        >
           <Pressable
             onPress={() => handleVibeUp(post._id)}
-            style={{ flexDirection: 'row', gap: 5,  }}
+            style={{ flexDirection: 'row', gap: 5 }}
           >
             <FontAwesome
               name={isVibedUp ? 'thumbs-up' : 'thumbs-o-up'}
               size={21}
               color={isVibedUp ? '#3b82f6' : '#000'}
-              style={{paddingTop:3}}
+              style={{ paddingTop: 3 }}
             />
             <Text
-              style={{ paddingTop: 6, fontSize: 13, color: isVibedUp ? '#3b82f6' : '#000' }}
+              style={{
+                paddingTop: 6,
+                fontSize: 13,
+                color: isVibedUp ? '#3b82f6' : '#000',
+              }}
             >
               Vibe Up
             </Text>
@@ -170,7 +199,11 @@ const PostCard = ({ post}) => {
               color={isVibedDown ? '#ef4444' : '#000'}
             />
             <Text
-              style={{ paddingTop: 6, fontSize: 13, color: isVibedDown ? '#ef4444' : '#000' }}
+              style={{
+                paddingTop: 6,
+                fontSize: 13,
+                color: isVibedDown ? '#ef4444' : '#000',
+              }}
             >
               Vibe Down
             </Text>
@@ -184,19 +217,20 @@ const PostCard = ({ post}) => {
             onPress={() =>
               navigation.navigate('Comments', { postId: post._id })
             }
-            style={{ flexDirection: 'row', gap: 5 , marginTop: 5}}
+            style={{ flexDirection: 'row', gap: 5, marginTop: 5 }}
           >
             <MaterialIcons name="comment" color="#000" size={21} />
-            <Text style={{ fontSize: 13,}}>{post.commentsCount || 0}</Text>
+            <Text style={{ fontSize: 13 }}>{post.commentsCount || 0}</Text>
           </Pressable>
           <Pressable
-          onPress={() =>
-            navigation.navigate('ShareScreen', {postValue: post})
-          }
-          style={{ flexDirection: 'row', marginTop: 5 }}>
+            onPress={() =>
+              navigation.navigate('ShareScreen', { postValue: post })
+            }
+            style={{ flexDirection: 'row', marginTop: 5 }}
+          >
             <Feather name="send" color="#000" size={21} />
           </Pressable>
-          <Pressable style={{ flexDirection: 'row',marginTop: 5 }}>
+          <Pressable style={{ flexDirection: 'row', marginTop: 5 }}>
             <Feather name="bookmark" color="#000" size={21} />
           </Pressable>
         </View>

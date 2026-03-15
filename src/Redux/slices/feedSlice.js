@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api';
 
-// Fetch feed 
+// 1. Fetch main feed
 export const fetchFeed = createAsyncThunk(
   'feed/fetchFeed',
   async ({ page = 1, currentUserId }, { rejectWithValue }) => {
@@ -20,10 +20,34 @@ export const fetchFeed = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data);
     }
-  }
+  },
 );
 
-// Send feedback (vibe up/down)
+// 2. NEW: Fetch Reels
+export const fetchReels = createAsyncThunk(
+  'feed/fetchReels',
+  async ({ page = 1, currentUserId }, { rejectWithValue }) => {
+    try {
+      // Using your new endpoint for reels
+      const res = await api.get('/api/post/reels');
+
+      // We format it exactly like the feed so the UI components can be reused
+      const formattedReels = res.data.reels.map(reel => ({
+        ...reel,
+        vibesUpCount: reel.vibesUp?.length || 0,
+        vibesDownCount: reel.vibesDown?.length || 0,
+        isVibedUp: reel.vibesUp?.includes(currentUserId),
+        isVibedDown: reel.vibesDown?.includes(currentUserId),
+      }));
+        console.log('formatted reel here in feed slice', formattedReels)
+      return { reels: formattedReels, pagination: res.data.pagination, page };
+    } catch (err) {
+      return rejectWithValue(err.response?.data);
+    }
+  },
+);
+
+// 3. Send feedback (vibe up/down)
 export const sendFeedback = createAsyncThunk(
   'feed/sendFeedback',
   async ({ postId, feedbackType }, { rejectWithValue }) => {
@@ -31,7 +55,6 @@ export const sendFeedback = createAsyncThunk(
       const res = await api.post(`/api/post/feedback/${postId}`, {
         feedbackType,
       });
-      console.log('Feedback response:', res.data);
       return {
         postId,
         vibesUpCount: res.data.vibesUpCount,
@@ -42,17 +65,25 @@ export const sendFeedback = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data);
     }
-  }
+  },
 );
 
 const feedSlice = createSlice({
   name: 'feed',
   initialState: {
+    // Feed State
     posts: [],
     page: 1,
     hasMore: true,
     initialLoading: false,
     paginationLoading: false,
+
+    // NEW: Reels State
+    reels: [],
+    reelsPage: 1,
+    reelsHasMore: true,
+    reelsInitialLoading: false,
+    reelsPaginationLoading: false,
   },
   reducers: {
     // For socket updat
@@ -75,22 +106,17 @@ const feedSlice = createSlice({
       if (commentsCount !== undefined) {
         state.posts[index].commentsCount = commentsCount;
       }
-      
     },
   },
   extraReducers: builder => {
     builder
-  
+      // --- FEED CASES ---
       .addCase(fetchFeed.pending, (state, action) => {
-        if (action.meta.arg.page === 1) {
-          state.initialLoading = true;
-        } else {
-          state.paginationLoading = true;
-        }
+        if (action.meta.arg.page === 1) state.initialLoading = true;
+        else state.paginationLoading = true;
       })
       .addCase(fetchFeed.fulfilled, (state, action) => {
         const { posts = [], pagination, page } = action.payload;
-
         if (page === 1) {
           state.posts = posts;
           state.initialLoading = false;
@@ -98,59 +124,94 @@ const feedSlice = createSlice({
           state.posts = [...state.posts, ...posts];
           state.paginationLoading = false;
         }
-
         state.page = page;
         state.hasMore = pagination?.hasMorePosts ?? false;
       })
-      .addCase(fetchFeed.rejected, (state, action) => {
+      .addCase(fetchFeed.rejected, state => {
         state.initialLoading = false;
         state.paginationLoading = false;
       })
 
-      
+      // --- NEW: REELS CASES ---
+      .addCase(fetchReels.pending, (state, action) => {
+        if (action.meta.arg.page === 1) state.reelsInitialLoading = true;
+        else state.reelsPaginationLoading = true;
+      })
+      .addCase(fetchReels.fulfilled, (state, action) => {
+        const { reels = [], pagination, page } = action.payload;
+        if (page === 1) {
+          state.reels = reels;
+          state.reelsInitialLoading = false;
+        } else {
+          state.reels = [...state.reels, ...reels];
+          state.reelsPaginationLoading = false;
+        }
+        state.reelsPage = page;
+        state.reelsHasMore = pagination?.hasMorePosts ?? false;
+      })
+      .addCase(fetchReels.rejected, state => {
+        state.reelsInitialLoading = false;
+        state.reelsPaginationLoading = false;
+      })
+
+      // --- OPTIMISTIC FEEDBACK (WORKS FOR BOTH FEED & REELS) ---
       .addCase(sendFeedback.pending, (state, action) => {
         const { postId, feedbackType } = action.meta.arg;
+
+        // Find the item whether it's in the posts array OR the reels array
         const post = state.posts.find(p => p._id === postId);
-        if (!post) return;
+        const reel = state.reels.find(r => r._id === postId);
 
-        if (feedbackType === 'vibeUp') {
-          if (post.isVibedUp) {
-            post.vibesUpCount--;
-            post.isVibedUp = false;
-          } else {
-            post.vibesUpCount++;
-            post.isVibedUp = true;
-            if (post.isVibedDown) {
-              post.vibesDownCount--;
-              post.isVibedDown = false;
+        // A helper function to apply the optimistic logic to whatever we found
+        const applyOptimisticVibe = item => {
+          if (feedbackType === 'vibeUp') {
+            if (item.isVibedUp) {
+              item.vibesUpCount--;
+              item.isVibedUp = false;
+            } else {
+              item.vibesUpCount++;
+              item.isVibedUp = true;
+              if (item.isVibedDown) {
+                item.vibesDownCount--;
+                item.isVibedDown = false;
+              }
             }
           }
-        }
-
-        if (feedbackType === 'vibeDown') {
-          if (post.isVibedDown) {
-            post.vibesDownCount--;
-            post.isVibedDown = false;
-          } else {
-            post.vibesDownCount++;
-            post.isVibedDown = true;
-            if (post.isVibedUp) {
-              post.vibesUpCount--;
-              post.isVibedUp = false;
+          if (feedbackType === 'vibeDown') {
+            if (item.isVibedDown) {
+              item.vibesDownCount--;
+              item.isVibedDown = false;
+            } else {
+              item.vibesDownCount++;
+              item.isVibedDown = true;
+              if (item.isVibedUp) {
+                item.vibesUpCount--;
+                item.isVibedUp = false;
+              }
             }
           }
-        }
+        };
+
+        // Apply it!
+        if (post) applyOptimisticVibe(post);
+        if (reel) applyOptimisticVibe(reel);
       })
       .addCase(sendFeedback.fulfilled, (state, action) => {
         const { postId, vibesUpCount, vibesDownCount, isVibedUp, isVibedDown } =
           action.payload;
-        const post = state.posts.find(p => p._id === postId);
-        if (!post) return;
 
-        post.vibesUpCount = vibesUpCount;
-        post.vibesDownCount = vibesDownCount;
-        post.isVibedUp = isVibedUp;
-        post.isVibedDown = isVibedDown;
+        const post = state.posts.find(p => p._id === postId);
+        const reel = state.reels.find(r => r._id === postId);
+
+        const syncWithServer = item => {
+          item.vibesUpCount = vibesUpCount;
+          item.vibesDownCount = vibesDownCount;
+          item.isVibedUp = isVibedUp;
+          item.isVibedDown = isVibedDown;
+        };
+
+        if (post) syncWithServer(post);
+        if (reel) syncWithServer(reel);
       });
   },
 });

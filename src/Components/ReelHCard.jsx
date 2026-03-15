@@ -11,11 +11,13 @@ import { useDispatch } from 'react-redux';
 import { sendFeedback } from '../Redux/slices/feedSlice';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import { followUser } from '../Redux/slices/authSlice';
 
 const ReelHCard = ({ reel, isVisible }) => {
   const navigation = useNavigation();
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
+  const currentUserId = user?._id;
   const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = reel;
 
   const handleVibeUp = postId => {
@@ -35,6 +37,23 @@ const ReelHCard = ({ reel, isVisible }) => {
       }),
     );
   };
+
+  //states
+  // 1. Reactive Redux check (updates instantly)
+  const followingList = user?.followings || user?.following || [];
+  const isFollowing = followingList.some(
+    item => item === reel.owner._id || item?._id === reel.owner._id,
+  );
+
+  // 2. Track if the user tapped the button right now
+  const [optimisticFollow, setOptimisticFollow] = useState(false);;
+
+  const handleFollow = userId => {
+      setOptimisticFollow(true); 
+      dispatch(followUser(userId));
+    };
+
+  const myPost = reel.owner._id === currentUserId;
 
   const videoRef = useRef(null);
 
@@ -87,9 +106,16 @@ const ReelHCard = ({ reel, isVisible }) => {
         </View>
 
         <View style={styles.rightHeader}>
-          <Pressable style={styles.followBtn}>
-            <Text style={{ fontWeight: '600' }}>Follow</Text>
+        {!myPost && (!isFollowing || optimisticFollow) && (
+           <Pressable
+            onPress={() => handleFollow(reel.owner._id)}
+            style={styles.followBtn}
+          >
+            <Text style={{ fontWeight: '600', fontSize: 15 }}>
+              {isFollowing || optimisticFollow ? 'Following' : 'Follow'}
+            </Text>
           </Pressable>
+         )}
 
           <Pressable
             onPress={() =>
