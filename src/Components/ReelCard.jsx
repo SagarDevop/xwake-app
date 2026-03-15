@@ -54,15 +54,15 @@ const ReelCard = ({ reel, isActive, onPress, containerHeight }) => {
       <View style={styles.rightBtn}>
         <View style={{ flexDirection: 'column', gap: 5 }}>
           <Feather name="thumbs-up" color="#ffffff" size={30} />
-          <Text style={{ color: 'white' }}>30 k</Text>
+          <Text style={{ color: 'white', alignSelf:'center' }}>{reel.vibesUpCount}</Text>
         </View>
         <View style={{ flexDirection: 'column', gap: 5, alignItems: 'center' }}>
           <Feather name="thumbs-down" color="#ffffff" size={30} />
-          <Text style={{ color: 'white' }}>1 k</Text>
+          <Text style={{ color: 'white' }}>{reel.vibesDownCount}</Text>
         </View>
         <View style={{ flexDirection: 'column', gap: 5 }}>
           <MaterialIcons name="comment" color="#ffffff" size={30} />
-          <Text style={{ color: 'white' }}>30 k</Text>
+          <Text style={{ color: 'white', alignSelf:'center' }}>{reel.commentsCount}</Text>
         </View>
         <View style={{ flexDirection: 'column', gap: 5 }}>
           <Feather name="send" color="#ffffff" size={30} />
@@ -134,5 +134,6 @@ const styles = StyleSheet.create({
     top: 230,
     alignItems: 'center',
     gap: 20,
+ 
   },
 });

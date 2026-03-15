@@ -3,16 +3,25 @@ import { View, FlatList, Dimensions } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import api from '../api';
 import { FlashList } from '@shopify/flash-list';
-
 import ReelCard from '../Components/ReelCard'
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+
+
+
 
 const { height } = Dimensions.get('window');
 
 const Reels = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const isFocused = useIsFocused();
-  const [data, setData] = useState([]);
   const [containerHeight, setContainerHeight] = useState(height);
+
+  const { posts, page, hasMore, initialLoading, paginationLoading } =
+      useSelector(state => state.feed);
+   
+    
+  const currentUserId = useSelector(state => state.auth.user._id);
 
   const viewConfigRef = useRef({
     viewAreaCoveragePercentThreshold: 80,
@@ -33,23 +42,10 @@ const Reels = () => {
 
   //
 
-  const fetchreels = async () => {
-   try {
-     const res = await api.get('/api/post/all?page=1&limit=20')
-     console.log('here we go', res.data.posts)
 
-     setData(res.data.posts)
-   } catch (error) {
-      console.log(error);
-    
-   }
-  }
+  const reelData = posts?.filter(item => item.type === "reel")
 
-  useEffect(() => {
-    fetchreels();
-  }, []);
-
-  const reelData = data?.filter(item => item.type === "reel")
+  console.log('reel data in reels', reelData)
 
   const renderItem = React.useCallback(({ item, index }) => {
   return (
