@@ -17,6 +17,7 @@ const ReelsList = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const isFocused = useIsFocused();
   const [reels, setReels] = useState(AllReels);
+  const [containerHeight, setContainerHeight] = useState(height);
   const flashListRef = useRef();
 
   const viewConfigRef = useRef({
@@ -59,19 +60,23 @@ const ReelsList = () => {
         <ReelCard 
           reel={item} 
           isActive={index === activeIndex && isFocused} 
-          onPress={() => handlePress(index)} 
+          onPress={() => handlePress(index)}
+          containerHeight={containerHeight}
         />
       );
     },
-    [activeIndex, isFocused],
+    [activeIndex, isFocused, containerHeight],
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} onLayout={(event) => {
+      const { height: layoutHeight } = event.nativeEvent.layout;
+      setContainerHeight(layoutHeight);
+    }}>
       <FlashList
         ref={flashListRef}
         data={data}
-        estimatedItemSize={height}
+        estimatedItemSize={containerHeight}
         keyExtractor={item => item._id}
         renderItem={renderItem}
         pagingEnabled

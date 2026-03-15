@@ -5,11 +5,11 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const ReelCard = ({ reel, isActive, onPress }) => {
+const ReelCard = ({ reel, isActive, onPress, containerHeight }) => {
 
   
   return (
-    <Pressable onPress={onPress} style={{ height: Dimensions.get('window').height }}>
+    <Pressable onPress={onPress} style={{ height: containerHeight }}>
       <Video
         source={{ uri: reel.post.url || "https://www.w3schools.com/html/movie.mp4" }}
         style={{ flex: 1 }}
@@ -83,7 +83,8 @@ export default React.memo(ReelCard, (prevProps, nextProps) => {
   return (
     prevProps.isActive === nextProps.isActive &&
     prevProps.reel._id === nextProps.reel._id &&
-    prevProps.onPress === nextProps.onPress
+    prevProps.onPress === nextProps.onPress &&
+    prevProps.containerHeight === nextProps.containerHeight
   );
 });
 

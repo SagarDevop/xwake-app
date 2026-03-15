@@ -11,7 +11,8 @@ const { height } = Dimensions.get('window');
 const Reels = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const isFocused = useIsFocused();
-  const [reels, setReels] = useState([]);
+  const [data, setData] = useState([]);
+  const [containerHeight, setContainerHeight] = useState(height);
 
   const viewConfigRef = useRef({
     viewAreaCoveragePercentThreshold: 80,
@@ -35,7 +36,9 @@ const Reels = () => {
   const fetchreels = async () => {
    try {
      const res = await api.get('/api/post/all?page=1&limit=20')
-     setReels(res.data.reels);
+     console.log('here we go', res.data.posts)
+
+     setData(res.data.posts)
    } catch (error) {
       console.log(error);
     
@@ -46,24 +49,30 @@ const Reels = () => {
     fetchreels();
   }, []);
 
+  const reelData = data?.filter(item => item.type === "reel")
+
   const renderItem = React.useCallback(({ item, index }) => {
   return (
     <ReelCard
       reel={item}
       isActive={index === activeIndex && isFocused}
+      containerHeight={containerHeight}
     />
   );
-}, [activeIndex, isFocused]);
+}, [activeIndex, isFocused, containerHeight]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} onLayout={(event) => {
+      const { height: layoutHeight } = event.nativeEvent.layout;
+      setContainerHeight(layoutHeight);
+    }}>
       <FlashList
-        data={reels}
-        estimatedItemSize={height}
+        data={reelData}
+        estimatedItemSize={containerHeight}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
         pagingEnabled
-         removeClippedSubviews
+        removeClippedSubviews
         showsVerticalScrollIndicator={false}
         onViewableItemsChanged={onViewRef.current}
         viewabilityConfig={viewConfigRef.current}
