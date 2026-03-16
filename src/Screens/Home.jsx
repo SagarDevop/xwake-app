@@ -65,6 +65,8 @@ const currentUserId = useSelector(state => state.auth.user._id);
 
   const viewabilityRef = useRef();
 
+  
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('accessToken');

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api';
 
-// 1. Fetch main feed
+
 export const fetchFeed = createAsyncThunk(
   'feed/fetchFeed',
   async ({ page = 1, currentUserId }, { rejectWithValue }) => {
@@ -23,15 +23,15 @@ export const fetchFeed = createAsyncThunk(
   },
 );
 
-// 2. NEW: Fetch Reels
+
 export const fetchReels = createAsyncThunk(
   'feed/fetchReels',
   async ({ page = 1, currentUserId }, { rejectWithValue }) => {
     try {
-      // Using your new endpoint for reels
-      const res = await api.get('/api/post/reels');
+      
+      
+      const res = await api.get(`/api/post/reels?page=${page}&limit=20`);
 
-      // We format it exactly like the feed so the UI components can be reused
       const formattedReels = res.data.reels.map(reel => ({
         ...reel,
         vibesUpCount: reel.vibesUp?.length || 0,
@@ -39,7 +39,6 @@ export const fetchReels = createAsyncThunk(
         isVibedUp: reel.vibesUp?.includes(currentUserId),
         isVibedDown: reel.vibesDown?.includes(currentUserId),
       }));
-        console.log('formatted reel here in feed slice', formattedReels)
       return { reels: formattedReels, pagination: res.data.pagination, page };
     } catch (err) {
       return rejectWithValue(err.response?.data);
@@ -47,7 +46,6 @@ export const fetchReels = createAsyncThunk(
   },
 );
 
-// 3. Send feedback (vibe up/down)
 export const sendFeedback = createAsyncThunk(
   'feed/sendFeedback',
   async ({ postId, feedbackType }, { rejectWithValue }) => {
@@ -71,14 +69,14 @@ export const sendFeedback = createAsyncThunk(
 const feedSlice = createSlice({
   name: 'feed',
   initialState: {
-    // Feed State
+    
     posts: [],
     page: 1,
     hasMore: true,
     initialLoading: false,
     paginationLoading: false,
 
-    // NEW: Reels State
+    
     reels: [],
     reelsPage: 1,
     reelsHasMore: true,
@@ -86,7 +84,7 @@ const feedSlice = createSlice({
     reelsPaginationLoading: false,
   },
   reducers: {
-    // For socket updat
+  
     updatePostFromSocket: (state, action) => {
       const { postId, vibesUp, vibesDown, commentsCount } = action.payload;
 
@@ -110,7 +108,7 @@ const feedSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      // --- FEED CASES ---
+      
       .addCase(fetchFeed.pending, (state, action) => {
         if (action.meta.arg.page === 1) state.initialLoading = true;
         else state.paginationLoading = true;
@@ -132,7 +130,7 @@ const feedSlice = createSlice({
         state.paginationLoading = false;
       })
 
-      // --- NEW: REELS CASES ---
+      
       .addCase(fetchReels.pending, (state, action) => {
         if (action.meta.arg.page === 1) state.reelsInitialLoading = true;
         else state.reelsPaginationLoading = true;
@@ -143,26 +141,39 @@ const feedSlice = createSlice({
           state.reels = reels;
           state.reelsInitialLoading = false;
         } else {
-          state.reels = [...state.reels, ...reels];
+          
+          const existingIds = new Set(state.reels.map(r => r._id));
+          const uniqueNext = reels.filter(r => !existingIds.has(r._id));
+          state.reels = [...state.reels, ...uniqueNext];
           state.reelsPaginationLoading = false;
         }
         state.reelsPage = page;
-        state.reelsHasMore = pagination?.hasMorePosts ?? false;
+        const serverHasMore = pagination?.hasMoreReels;
+        if (typeof serverHasMore === 'boolean') {
+          state.reelsHasMore = serverHasMore;
+        } else if (page === 1) {
+          state.reelsHasMore = reels.length > 0;
+        } else {
+          const existingIds = new Set(state.reels.map(r => r._id));
+         
+          state.reelsHasMore = reels.some(r => !existingIds.has(r._id));
+        }
       })
       .addCase(fetchReels.rejected, state => {
         state.reelsInitialLoading = false;
         state.reelsPaginationLoading = false;
       })
 
-      // --- OPTIMISTIC FEEDBACK (WORKS FOR BOTH FEED & REELS) ---
+      
       .addCase(sendFeedback.pending, (state, action) => {
         const { postId, feedbackType } = action.meta.arg;
 
-        // Find the item whether it's in the posts array OR the reels array
+        
+       
         const post = state.posts.find(p => p._id === postId);
         const reel = state.reels.find(r => r._id === postId);
 
-        // A helper function to apply the optimistic logic to whatever we found
+       
         const applyOptimisticVibe = item => {
           if (feedbackType === 'vibeUp') {
             if (item.isVibedUp) {
@@ -192,7 +203,7 @@ const feedSlice = createSlice({
           }
         };
 
-        // Apply it!
+       
         if (post) applyOptimisticVibe(post);
         if (reel) applyOptimisticVibe(reel);
       })
