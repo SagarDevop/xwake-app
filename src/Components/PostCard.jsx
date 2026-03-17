@@ -1,21 +1,20 @@
-import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
+import React, { useState  } from 'react';
+import { useRef } from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { sendFeedback } from '../Redux/slices/feedSlice';
-import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { followUser } from '../Redux/slices/authSlice';
+import FastImage from 'react-native-fast-image'; // JARVIS: Upgraded to FastImage
+import { shallowEqual } from 'react-redux';
 
 const PostCard = ({ post }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const user = useSelector(state => state.auth.user);
-  const currentUserId = user?._id;
 
   const { isVibedUp, isVibedDown, vibesUpCount, vibesDownCount } = post;
 
@@ -36,18 +35,20 @@ const PostCard = ({ post }) => {
       }),
     );
   };
-  //states
-  
-  const followingList = user?.followings || user?.following || [];
+
+ const currentUserId = useSelector(state => state.auth.user?._id);
+  const followingList = useSelector(
+    state => state.auth.user?.followings || state.auth.user?.following || [],
+    shallowEqual,
+  );
   const isFollowing = followingList.some(
     item => item === post.owner._id || item?._id === post.owner._id,
   );
 
-  
   const [optimisticFollow, setOptimisticFollow] = useState(false);
 
   const handleFollow = userId => {
-    setOptimisticFollow(true); 
+    setOptimisticFollow(true);
     dispatch(followUser(userId));
   };
 
@@ -55,75 +56,56 @@ const PostCard = ({ post }) => {
 
   const timeAgo = iso => {
     const seconds = Math.floor((new Date() - new Date(iso)) / 1000);
-
     if (seconds < 60) return 'Just now';
-
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes} min ago`;
-
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours} hr ago`;
-
     const days = Math.floor(hours / 24);
     return `${days} day${days > 1 ? 's' : ''} ago`;
   };
 
+  const renderCount = useRef(0);
+  renderCount.current += 1;
+
+  console.log(
+    `[RENDER TEST] Reel ID: ${post._id} rendered ${renderCount.current} times`,
+  );
+
   return (
     <View style={{ flex: 1 }}>
-      <View
-        style={{
-          height: 70,
-          flexDirection: 'row',
-          padding: 10,
-          justifyContent: 'space-between',
-        }}
-      >
+      <View style={styles.headerContainer}>
         <View style={{ flexDirection: 'row' }}>
-          <Image
-            style={{
-              height: 50,
-              width: 50,
-              borderRadius: 100,
-            }}
+          {/* JARVIS: Upgraded Avatar to FastImage */}
+          <FastImage
+            style={styles.avatar}
             source={{
               uri:
                 post.owner.profilePic.url ||
-                'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=387&auto=format&fit=crop',
+              priority: FastImage.priority.normal,
             }}
           />
-          <View
-            style={{
-              flexDirection: 'column',
-              gap: 3,
-              marginLeft: 8,
-              paddingTop: 2,
-            }}
-          >
-            <Text style={{ fontWeight: '600', fontSize: 16 }}>
-              {post.owner.name}
-            </Text>
-            <Text style={{ fontSize: 13, color: '#777b7c' }}>
-              {timeAgo(post.createdAt)}
-            </Text>
+          <View style={styles.userInfo}>
+            <Text style={styles.usernameText}>{post.owner.name}</Text>
+            <Text style={styles.timeText}>{timeAgo(post.createdAt)}</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', gap: 20, marginTop: 5 }}>
-         
+
+        <View style={styles.actionHeader}>
           {!myPost && (!isFollowing || optimisticFollow) && (
             <Pressable
               onPress={() => handleFollow(post.owner._id)}
-              disabled={optimisticFollow} 
-              style={{
-                backgroundColor:
-                  isFollowing || optimisticFollow ? '#d0d0d0' : '#e7e7e7',
-                marginBottom: 14,
-                paddingHorizontal: 14,
-                paddingVertical: 5,
-                borderRadius: 10,
-                elevation: 3,
-              }}
+              disabled={optimisticFollow}
+              style={[
+                styles.followBtn,
+                {
+                  backgroundColor:
+                    isFollowing || optimisticFollow ? '#d0d0d0' : '#e7e7e7',
+                },
+              ]}
             >
-              <Text style={{ fontWeight: '600', fontSize: 15 }}>
+              <Text style={styles.followText}>
                 {isFollowing || optimisticFollow ? 'Following' : 'Follow'}
               </Text>
             </Pressable>
@@ -142,29 +124,22 @@ const PostCard = ({ post }) => {
           </Pressable>
         </View>
       </View>
-      <Image
-        style={{
-          height: 500,
-        }}
+
+      {/* JARVIS: Upgraded Main Post Image to FastImage for caching */}
+      <FastImage
+        style={styles.postImage}
         source={{
           uri: post.post.url,
+          priority: FastImage.priority.high, // High priority for viewport images
         }}
+        resizeMode={FastImage.resizeMode.cover}
       />
-      <View
-        style={{
-          height: 40,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          paddingHorizontal: 8,
-          paddingVertical: 5,
-        }}
-      >
-        <View
-          style={{ flexDirection: 'row', gap: 22, justifyContent: 'center' }}
-        >
+
+      <View style={styles.actionFooter}>
+        <View style={styles.footerIcons}>
           <Pressable
             onPress={() => handleVibeUp(post._id)}
-            style={{ flexDirection: 'row', gap: 5 }}
+            style={styles.iconRow}
           >
             <FontAwesome
               name={isVibedUp ? 'thumbs-up' : 'thumbs-o-up'}
@@ -173,11 +148,10 @@ const PostCard = ({ post }) => {
               style={{ paddingTop: 3 }}
             />
             <Text
-              style={{
-                paddingTop: 6,
-                fontSize: 13,
-                color: isVibedUp ? '#3b82f6' : '#000',
-              }}
+              style={[
+                styles.iconText,
+                { color: isVibedUp ? '#3b82f6' : '#000' },
+              ]}
             >
               Vibe Up
             </Text>
@@ -190,20 +164,19 @@ const PostCard = ({ post }) => {
 
           <Pressable
             onPress={() => handleVibeDown(post._id)}
-            style={{ flexDirection: 'row', gap: 5 }}
+            style={styles.iconRow}
           >
             <FontAwesome
               name={isVibedDown ? 'thumbs-down' : 'thumbs-o-down'}
               size={21}
-              style={{ paddingTop: 6 }}
               color={isVibedDown ? '#ef4444' : '#000'}
+              style={{ paddingTop: 6 }}
             />
             <Text
-              style={{
-                paddingTop: 6,
-                fontSize: 13,
-                color: isVibedDown ? '#ef4444' : '#000',
-              }}
+              style={[
+                styles.iconText,
+                { color: isVibedDown ? '#ef4444' : '#000' },
+              ]}
             >
               Vibe Down
             </Text>
@@ -213,15 +186,17 @@ const PostCard = ({ post }) => {
               {vibesDownCount || 0}
             </Text>
           </Pressable>
+
           <Pressable
             onPress={() =>
               navigation.navigate('Comments', { postId: post._id })
             }
-            style={{ flexDirection: 'row', gap: 5, marginTop: 5 }}
+            style={[styles.iconRow, { marginTop: 5 }]}
           >
             <MaterialIcons name="comment" color="#000" size={21} />
             <Text style={{ fontSize: 13 }}>{post.commentsCount || 0}</Text>
           </Pressable>
+
           <Pressable
             onPress={() =>
               navigation.navigate('ShareScreen', { postValue: post })
@@ -230,28 +205,71 @@ const PostCard = ({ post }) => {
           >
             <Feather name="send" color="#000" size={21} />
           </Pressable>
+
           <Pressable style={{ flexDirection: 'row', marginTop: 5 }}>
             <Feather name="bookmark" color="#000" size={21} />
           </Pressable>
         </View>
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 15,
-          paddingLeft: 9,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 16, fontWeight: '600' }}>
-          {post.owner.username}
-        </Text>
-        <Text style={{ marginTop: 3, color: '#767777' }}>{post.caption}</Text>
+
+      <View style={styles.captionContainer}>
+        <Text style={styles.captionUsername}>{post.owner.username}</Text>
+        <Text style={styles.captionText}>{post.caption}</Text>
       </View>
     </View>
   );
 };
 
-export default React.memo(PostCard);
+// JARVIS: The Secret Sauce. Strict checking so the component ONLY re-renders if its OWN data changes.
+export default React.memo(PostCard, (prevProps, nextProps) => {
+  return (
+    prevProps.post._id === nextProps.post._id &&
+    prevProps.post.vibesUpCount === nextProps.post.vibesUpCount &&
+    prevProps.post.vibesDownCount === nextProps.post.vibesDownCount &&
+    prevProps.post.commentsCount === nextProps.post.commentsCount &&
+    prevProps.post.isVibedUp === nextProps.post.isVibedUp &&
+    prevProps.post.isVibedDown === nextProps.post.isVibedDown
+  );
+});
 
-const styles = StyleSheet.create({});
+// Extracted styles to prevent recreating objects on every render
+const styles = StyleSheet.create({
+  headerContainer: {
+    height: 70,
+    flexDirection: 'row',
+    padding: 10,
+    justifyContent: 'space-between',
+  },
+  avatar: { height: 50, width: 50, borderRadius: 100 },
+  userInfo: { flexDirection: 'column', gap: 3, marginLeft: 8, paddingTop: 2 },
+  usernameText: { fontWeight: '600', fontSize: 16 },
+  timeText: { fontSize: 13, color: '#777b7c' },
+  actionHeader: { flexDirection: 'row', gap: 20, marginTop: 5 },
+  followBtn: {
+    marginBottom: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 10,
+    elevation: 3,
+  },
+  followText: { fontWeight: '600', fontSize: 15 },
+  postImage: { height: 500, width: '100%' },
+  actionFooter: {
+    height: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  footerIcons: { flexDirection: 'row', gap: 22, justifyContent: 'center' },
+  iconRow: { flexDirection: 'row', gap: 5 },
+  iconText: { paddingTop: 6, fontSize: 13 },
+  captionContainer: {
+    flexDirection: 'row',
+    gap: 15,
+    paddingLeft: 9,
+    marginBottom: 20,
+  },
+  captionUsername: { fontSize: 16, fontWeight: '600' },
+  captionText: { marginTop: 3, color: '#767777' },
+});

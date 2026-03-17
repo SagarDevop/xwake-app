@@ -16,7 +16,6 @@ const Stack = createNativeStackNavigator();
 
 const RootNavigation = () => {
   const user = useSelector(state => state.auth.user);
-  console.log('hi dwe', user)
   return (
     <Stack.Navigator>
       <Stack.Screen

@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
-  baseURL: 'https://twikit-backend.onrender.com'
+  baseURL: 'https://twikit-com-dqrw.onrender.com/'
 
 });
 

@@ -16,9 +16,6 @@ const AuthNavigtion = () => {
   const { isAuth, loading: authLoading } = useSelector(state => state.auth);
 
   const { initialLoading } = useSelector(state => state.feed);
-
-  console.log('AUTH LOADING:', authLoading);
-  console.log('FEED LOADING:', initialLoading);
  
 
   useEffect(() => {

@@ -21,7 +21,6 @@ const Profile = () => {
   const navigation = useNavigation()
   const user = useSelector(state => state.auth.user);
   const posts = useSelector(state => state.feed.posts);
-  console.log('user from profile', user);
 
   const myPosts = posts?.filter(p => isSameId(p.owner?._id, user._id));
 
